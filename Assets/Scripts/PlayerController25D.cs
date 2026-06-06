@@ -22,8 +22,9 @@ public class PlayerController25D : MonoBehaviour
     private LineRenderer lineRenderer;  // Component vẽ dây câu
     private GameObject currentBobber;   // Đối tượng phao câu hiện tại
     
-    public float castDistance = 2.5f;   // Khoảng cách quăng cần câu
-    public float castArcHeight = 0.8f;  // Chiều cao bay vòng cung của phao câu
+    public float castDistance = 5.0f;   // Khoảng cách quăng cần câu (quăng xa hơn)
+    public float castArcHeight = 1.2f;  // Chiều cao bay vòng cung của phao câu
+    public float bobberYOffset = -0.3f; // Độ lệch Y khi phao nổi (để nổi sát mặt đất/nước hơn)
     private bool isBobberActive = false; // Trạng thái phao câu đang hoạt động ở dưới nước
 
     [Header("Rod Tip Anchors")]
@@ -215,7 +216,7 @@ public class PlayerController25D : MonoBehaviour
         }
 
         Vector3 targetPos = transform.position + facingDir * castDistance;
-        targetPos.y = transform.position.y; // Đáp xuống mặt đất
+        targetPos.y = transform.position.y + bobberYOffset; // Đáp xuống mặt đất/nước có offset
 
         // Tạo GameObject phao câu
         currentBobber = new GameObject("FishingBobber");
