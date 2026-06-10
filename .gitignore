@@ -110,3 +110,7 @@ args.json
 all_prefabs.json
 prefabs.json
 mapped_prefabs.json
+.gemini/
+.claude/
+.vscode/
+*.slnx
