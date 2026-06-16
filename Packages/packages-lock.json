@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "com.ivanmurzak.unity.mcp": {
-      "version": "0.79.0",
+      "version": "0.81.0",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -10,6 +10,12 @@
         "extensions.unity.playerprefsex": "2.1.5"
       },
       "url": "https://package.openupm.com"
+    },
+    "com.unity.2d.sprite": {
+      "version": "1.0.0",
+      "depth": 0,
+      "source": "builtin",
+      "dependencies": {}
     },
     "com.unity.ai.navigation": {
       "version": "2.0.12",

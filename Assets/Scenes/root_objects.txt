@@ -1,0 +1,7 @@
+Root: Main Camera
+Root: TestCam
+Root: GameObject
+Root: Directional Light
+Root: Cube
+Root: _IslandHolder
+Root: Global Volume

@@ -78,8 +78,47 @@ public class PlayerController25D : MonoBehaviour
 
     void Update()
     {
+        // Kiểm tra phím bấm bằng cả New Input System (nếu khả dụng) và legacy Input
+        bool fKeyPressed = false;
+        bool castKeyPressed = false;
+        float moveX = 0f;
+        float moveZ = 0f;
+
+#if ENABLE_INPUT_SYSTEM
+        var keyboard = UnityEngine.InputSystem.Keyboard.current;
+        var mouse = UnityEngine.InputSystem.Mouse.current;
+        if (keyboard != null)
+        {
+            fKeyPressed = keyboard.fKey.wasPressedThisFrame;
+            castKeyPressed = keyboard.spaceKey.wasPressedThisFrame;
+            
+            if (!isCasting)
+            {
+                if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed) moveX = -1f;
+                else if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed) moveX = 1f;
+
+                if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed) moveZ = -1f;
+                else if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed) moveZ = 1f;
+            }
+        }
+        if (mouse != null)
+        {
+            castKeyPressed = castKeyPressed || mouse.leftButton.wasPressedThisFrame;
+        }
+#endif
+
+        // Dự phòng (fallback) dùng hệ thống Input cũ
+        fKeyPressed = fKeyPressed || Input.GetKeyDown(KeyCode.F);
+        castKeyPressed = castKeyPressed || Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space);
+
+        if (!isCasting)
+        {
+            if (moveX == 0f) moveX = Input.GetAxisRaw("Horizontal");
+            if (moveZ == 0f) moveZ = Input.GetAxisRaw("Vertical");
+        }
+
         // Xử lý F key - toggle cầm/thả cần câu (chỉ thực hiện khi không đang quăng cần)
-        if (!isCasting && Input.GetKeyDown(KeyCode.F))
+        if (!isCasting && fKeyPressed)
         {
             if (isBobberActive)
             {
@@ -90,7 +129,7 @@ public class PlayerController25D : MonoBehaviour
         }
 
         // Xử lý quăng cần câu khi cầm cần câu và nhấn chuột trái hoặc phím Space
-        if (hasRod && (Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.Space)))
+        if (hasRod && castKeyPressed)
         {
             if (isBobberActive)
             {
@@ -124,29 +163,15 @@ public class PlayerController25D : MonoBehaviour
             }
         }
 
-        // Lấy nút bấm di chuyển từ bàn phím (A/D/W/S hoặc Mũi tên)
-        // Nếu đang quăng cần câu, không nhận di chuyển từ bàn phím (moveX, moveZ = 0)
-        float moveX = 0f;
-        float moveZ = 0f;
-        
-        if (!isCasting)
+        // Tự động thu cần câu nếu người chơi di chuyển khi phao đang dưới nước
+        if (!isCasting && isBobberActive && (moveX != 0f || moveZ != 0f))
         {
-            moveX = Input.GetAxisRaw("Horizontal");
-            moveZ = Input.GetAxisRaw("Vertical"); // Nhận trục Z thay vì trục Y cũ
-            
-            // Tự động thu cần câu nếu người chơi di chuyển khi phao đang dưới nước
-            if (isBobberActive && (moveX != 0f || moveZ != 0f))
-            {
-                DestroyBobber();
-                isBobberActive = false;
-            }
+            DestroyBobber();
+            isBobberActive = false;
         }
 
         // Tạo Vector di chuyển trên mặt phẳng phẳng X và Z
         Vector3 moveDirection = new Vector3(moveX, 0f, moveZ).normalized;
-
-        // Thực hiện di chuyển
-        controller.Move(moveDirection * speed * Time.deltaTime);
 
         // Áp dụng trọng lực để nhân vật luôn bám sát mặt đất
         if (controller.isGrounded && velocity.y < 0)
@@ -155,7 +180,13 @@ public class PlayerController25D : MonoBehaviour
         }
         
         velocity.y += gravity * Time.deltaTime;
-        controller.Move(velocity * Time.deltaTime);
+
+        // Kết hợp di chuyển ngang và di chuyển dọc (trọng lực) thành một cuộc gọi Move duy nhất
+        Vector3 finalMovement = moveDirection * speed;
+        finalMovement.y = velocity.y;
+
+        // Thực hiện di chuyển
+        controller.Move(finalMovement * Time.deltaTime);
 
         // Cập nhật Animator parameters cho animation
         if (animator != null)
