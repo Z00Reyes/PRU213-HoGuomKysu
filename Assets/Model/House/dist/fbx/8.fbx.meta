@@ -3,7 +3,22 @@ guid: b2318e8b5f22b5b43865ec4faa3d9ca6
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: objects.008
+    second: {fileID: 7211448773848044386, guid: 98e132f10d6904441abf4d655fbc50c0, type: 3}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wall.008
+    second: {fileID: 2100000, guid: 6369dcd4b1eafa64a89229827cdcaf4c, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: windows.008
+    second: {fileID: 7770318624900243041, guid: 50c9aeb646f92844887004953f9acdbd, type: 3}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -33,7 +48,7 @@ ModelImporter:
     isReadable: 0
   meshes:
     lODScreenPercentages: []
-    globalScale: 1
+    globalScale: 800
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
@@ -91,7 +106,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 1
+    globalScale: 800
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 0
