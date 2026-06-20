@@ -3,7 +3,27 @@ guid: 258c3842778cec1479bdc10a56d99070
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: grass
+    second: {fileID: 2100000, guid: d1350a24b123aa94095c694bce025dce, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: objects
+    second: {fileID: 2100000, guid: d1350a24b123aa94095c694bce025dce, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: wall
+    second: {fileID: 2100000, guid: d1350a24b123aa94095c694bce025dce, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: windows
+    second: {fileID: 2100000, guid: 630681d8bbfe89b418ec3f69b2b509fc, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
