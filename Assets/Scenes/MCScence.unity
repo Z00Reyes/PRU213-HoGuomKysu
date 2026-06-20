@@ -7085,10 +7085,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.Inventory
   slotCount: 24
   slots:
-  - itemData: {fileID: 1539519162}
-    quantity: 20
-  - itemData: {fileID: 1539519162}
-    quantity: 1
+  - itemData: {fileID: 0}
+    quantity: 0
+  - itemData: {fileID: 0}
+    quantity: 0
   - itemData: {fileID: 0}
     quantity: 0
   - itemData: {fileID: 0}
