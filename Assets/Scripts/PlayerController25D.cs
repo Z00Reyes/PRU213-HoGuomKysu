@@ -52,6 +52,7 @@ public class PlayerController25D : MonoBehaviour
     private float minigameBarPos = 0.2f;
     private float minigameBarVelocity = 0f;
     public float minigameBarSize = 0.22f; // Height of catch bar in 0-1 range
+    public float minigameDuration = 15f;  // Duration of the fishing minigame
 
     private FishingMinigameUI ui;
 
@@ -251,7 +252,7 @@ public class PlayerController25D : MonoBehaviour
                     
                     fishingState = FishingState.Minigame;
                     minigameProgress = 0.2f; // Give a small headstart
-                    minigameTimer = 15f;
+                    minigameTimer = minigameDuration;
                     minigameFishPos = 0.5f;
                     minigameFishTarget = 0.5f;
                     minigameFishMoveTimer = 0f;
@@ -349,6 +350,27 @@ public class PlayerController25D : MonoBehaviour
 
                     DestroyBobber();
                     isBobberActive = false;
+
+                    // Add caught fish to player inventory
+                    var playerInventory = GetComponent<InventorySystem.Inventory>();
+                    if (playerInventory == null)
+                    {
+                        playerInventory = FindAnyObjectByType<InventorySystem.Inventory>();
+                    }
+                    if (playerInventory != null)
+                    {
+                        var fishItem = GetOrCreateFishItemData(fishName, fishSprite);
+                        bool added = playerInventory.AddItem(fishItem, 1);
+                        if (added)
+                        {
+                            Debug.Log($"Added 1 {fishName} to Inventory.");
+                        }
+                        else
+                        {
+                            Debug.LogWarning($"Failed to add {fishName} to Inventory (inventory full).");
+                        }
+                    }
+
                     fishingState = FishingState.CatchSuccess;
                 }
                 // Failure condition
@@ -367,8 +389,14 @@ public class PlayerController25D : MonoBehaviour
                 break;
 
             case FishingState.CatchSuccess:
-                // Dismiss trophy popup with Click or Space
-                bool dismissTrophy = castKeyPressed;
+                // Dismiss trophy popup only with Space
+                bool dismissTrophy = Input.GetKeyDown(KeyCode.Space);
+#if ENABLE_INPUT_SYSTEM
+                if (UnityEngine.InputSystem.Keyboard.current != null)
+                {
+                    dismissTrophy = dismissTrophy || UnityEngine.InputSystem.Keyboard.current.spaceKey.wasPressedThisFrame;
+                }
+#endif
                 if (dismissTrophy)
                 {
                     if (ui != null) ui.HideTrophy();
@@ -666,6 +694,38 @@ public class PlayerController25D : MonoBehaviour
         }
 
         return false;
+    }
+
+    private Dictionary<string, InventorySystem.ItemData> fishItemCache = new Dictionary<string, InventorySystem.ItemData>();
+
+    private InventorySystem.ItemData GetOrCreateFishItemData(string fishName, Sprite fishSprite)
+    {
+        if (fishItemCache.TryGetValue(fishName, out var cachedItem))
+        {
+            return cachedItem;
+        }
+
+        InventorySystem.ItemData fishItem = ScriptableObject.CreateInstance<InventorySystem.ItemData>();
+        fishItem.id = "fish_" + fishName.Replace(" ", "_").ToLower();
+        fishItem.itemName = fishName;
+        fishItem.description = $"A fresh caught {fishName}. Can be used for cooking or trading.";
+        fishItem.type = InventorySystem.ItemType.Material;
+        
+        // Determine rarity
+        if (fishName.Contains("Shark") || fishName.Contains("Ray") || fishName.Contains("Dinosaur"))
+            fishItem.rarity = InventorySystem.Rarity.Legendary;
+        else if (fishName.Contains("Salmon") || fishName.Contains("Trout") || fishName.Contains("Eel") || fishName.Contains("Pike"))
+            fishItem.rarity = InventorySystem.Rarity.Epic;
+        else if (fishName.Contains("Bass") || fishName.Contains("Gar") || fishName.Contains("Porgy") || fishName.Contains("Snapper") || fishName.Contains("Perch"))
+            fishItem.rarity = InventorySystem.Rarity.Rare;
+        else
+            fishItem.rarity = InventorySystem.Rarity.Common;
+
+        fishItem.maxStackSize = 20; // 20 fish max per slot!
+        fishItem.icon = fishSprite;
+
+        fishItemCache[fishName] = fishItem;
+        return fishItem;
     }
 
     void OnDestroy()

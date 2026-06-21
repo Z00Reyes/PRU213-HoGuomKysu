@@ -308,7 +308,7 @@ public class FishingMinigameUI : MonoBehaviour
 
         timerText = timerGo.AddComponent<Text>();
         timerText.font = uiFont;
-        timerText.text = "Time: 15.0s\nHold Left-Click";
+        timerText.text = "Time: 15.0s";
         timerText.color = Color.yellow;
         timerText.fontSize = 11;
         timerText.alignment = TextAnchor.MiddleCenter;
@@ -423,7 +423,7 @@ public class FishingMinigameUI : MonoBehaviour
 
         Text subtitleText = subtitleGo.AddComponent<Text>();
         subtitleText.font = uiFont;
-        subtitleText.text = "Press LEFT CLICK or SPACE to continue";
+        subtitleText.text = "Press SPACE to continue";
         subtitleText.color = new Color(0.7f, 0.7f, 0.7f);
         subtitleText.fontSize = 13;
         subtitleText.alignment = TextAnchor.MiddleCenter;
@@ -454,6 +454,7 @@ public class FishingMinigameUI : MonoBehaviour
 
     public void ShowMinigame()
     {
+        HideBiteAlert();
         if (minigameGroupGo != null) minigameGroupGo.SetActive(true);
     }
 
@@ -482,7 +483,7 @@ public class FishingMinigameUI : MonoBehaviour
         progressFillRt.offsetMax = Vector2.zero;
 
         // 4. Update Timer Text
-        timerText.text = string.Format("Time: {0:F1}s\nHold Left-Click", timeLeft);
+        timerText.text = string.Format("Time: {0:F1}s", timeLeft);
     }
 
     public void ShowTrophy(Sprite fishSprite, string fishName)
