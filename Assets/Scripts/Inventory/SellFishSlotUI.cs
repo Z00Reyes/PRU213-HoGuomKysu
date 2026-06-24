@@ -14,6 +14,7 @@ namespace InventorySystem
         [SerializeField] private Image itemIcon;
         [SerializeField] private TextMeshProUGUI quantityText;
         [SerializeField] private Image selectionGlow;
+        [SerializeField] private TextMeshProUGUI priceText;
 
         [Header("Aesthetics & Animation")]
         [SerializeField] private float hoverScaleAmount = 1.06f;
@@ -25,12 +26,14 @@ namespace InventorySystem
 
         private int slotIndex = -1;
         private SellFishStoreUI parentStoreUI;
-        private InventorySlot currentSlot;
+        private ItemData currentItemData;
+        private int currentQuantity;
         private Coroutine scaleCoroutine;
         private Vector3 originalScale;
 
         public int SlotIndex => slotIndex;
-        public InventorySlot CurrentSlot => currentSlot;
+        public ItemData CurrentItemData => currentItemData;
+        public int CurrentQuantity => currentQuantity;
 
         private void Awake()
         {
@@ -48,47 +51,73 @@ namespace InventorySystem
             ClearSlot();
         }
 
-        public void SetItem(InventorySlot slot)
+        public void SetItem(ItemData itemData, int qty)
         {
-            currentSlot = slot;
+            currentItemData = itemData;
+            currentQuantity = qty;
 
-            if (slot == null || slot.IsEmpty)
+            if (itemData == null)
             {
                 ClearSlot();
                 return;
             }
 
             // Set icon
-            itemIcon.sprite = slot.itemData.icon;
-            itemIcon.gameObject.SetActive(slot.itemData.icon != null);
+            itemIcon.sprite = itemData.icon;
+            itemIcon.gameObject.SetActive(itemData.icon != null);
 
             // Set quantity text
-            if (slot.quantity > 1)
+            quantityText.text = qty.ToString();
+            quantityText.gameObject.SetActive(true);
+
+            // Set icon alpha and text color depending on owned quantity
+            if (qty == 0)
             {
-                quantityText.text = slot.quantity.ToString();
-                quantityText.gameObject.SetActive(true);
+                itemIcon.color = new Color(1f, 1f, 1f, 0.3f);
+                quantityText.color = new Color(0.6f, 0.6f, 0.6f, 0.8f);
             }
             else
             {
-                quantityText.gameObject.SetActive(false);
+                itemIcon.color = Color.white;
+                quantityText.color = Color.white;
             }
 
             // Rarity color highlight on background (subtle tint)
             if (slotBackground != null)
             {
-                Color tint = GetRarityColor(slot.itemData.rarity);
+                Color tint = GetRarityColor(itemData.rarity);
                 slotBackground.color = Color.Lerp(Color.white, tint, 0.15f);
+            }
+
+            // Set price text
+            if (priceText != null)
+            {
+                priceText.text = $"{itemData.sellPrice}g";
+                priceText.gameObject.SetActive(true);
             }
         }
 
         public void ClearSlot()
         {
-            currentSlot = null;
-            if (itemIcon != null) itemIcon.gameObject.SetActive(false);
-            if (quantityText != null) quantityText.gameObject.SetActive(false);
+            currentItemData = null;
+            currentQuantity = 0;
+            if (itemIcon != null)
+            {
+                itemIcon.gameObject.SetActive(false);
+                itemIcon.color = Color.white;
+            }
+            if (quantityText != null)
+            {
+                quantityText.gameObject.SetActive(false);
+                quantityText.color = Color.white;
+            }
             if (slotBackground != null)
             {
                 slotBackground.color = Color.white;
+            }
+            if (priceText != null)
+            {
+                priceText.gameObject.SetActive(false);
             }
         }
 

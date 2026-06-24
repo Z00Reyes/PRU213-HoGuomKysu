@@ -434,17 +434,30 @@ public class PlayerController25D : MonoBehaviour
         // 5. Update Animator parameters
         if (animator != null)
         {
-            animator.SetFloat("Horizontal", moveX);
-            animator.SetFloat("Vertical", moveZ);
-
-            float currentSpeed = moveDirection.magnitude > 0 ? 1f : 0f;
-            animator.SetFloat("Speed", currentSpeed);
+            // Resolve dominant animation direction for diagonal movement
+            float animHorizontal = 0f;
+            float animVertical = 0f;
 
             if (moveX != 0f || moveZ != 0f)
             {
                 lastHorizontal = moveX;
                 lastVertical = moveZ;
+
+                if (Mathf.Abs(moveX) >= Mathf.Abs(moveZ))
+                {
+                    animHorizontal = moveX;
+                }
+                else
+                {
+                    animVertical = moveZ;
+                }
             }
+
+            animator.SetFloat("Horizontal", animHorizontal);
+            animator.SetFloat("Vertical", animVertical);
+
+            float currentSpeed = moveDirection.magnitude > 0 ? 1f : 0f;
+            animator.SetFloat("Speed", currentSpeed);
 
             animator.SetFloat("LastHorizontal", lastHorizontal);
             animator.SetFloat("LastVertical", lastVertical);
@@ -719,15 +732,27 @@ public class PlayerController25D : MonoBehaviour
         fishItem.description = $"A fresh caught {fishName}. Can be used for cooking or trading.";
         fishItem.type = InventorySystem.ItemType.Material;
         
-        // Determine rarity
+        // Determine rarity & price
         if (fishName.Contains("Shark") || fishName.Contains("Ray") || fishName.Contains("Dinosaur"))
+        {
             fishItem.rarity = InventorySystem.Rarity.Legendary;
+            fishItem.sellPrice = 500;
+        }
         else if (fishName.Contains("Salmon") || fishName.Contains("Trout") || fishName.Contains("Eel") || fishName.Contains("Pike"))
+        {
             fishItem.rarity = InventorySystem.Rarity.Epic;
+            fishItem.sellPrice = 150;
+        }
         else if (fishName.Contains("Bass") || fishName.Contains("Gar") || fishName.Contains("Porgy") || fishName.Contains("Snapper") || fishName.Contains("Perch"))
+        {
             fishItem.rarity = InventorySystem.Rarity.Rare;
+            fishItem.sellPrice = 50;
+        }
         else
+        {
             fishItem.rarity = InventorySystem.Rarity.Common;
+            fishItem.sellPrice = 15;
+        }
 
         fishItem.maxStackSize = 20; // 20 fish max per slot!
         fishItem.icon = fishSprite;
@@ -745,7 +770,7 @@ public class PlayerController25D : MonoBehaviour
         var inv = GetComponent<InventorySystem.Inventory>();
         if (inv == null) return;
 
-        bool shouldShow = (fishingState != FishingState.Idle && fishingState != FishingState.CatchSuccess && fishingState != FishingState.CatchFailure) && hasRod && !string.IsNullOrEmpty(inv.equippedRodId);
+        bool shouldShow = false; // Vô hiệu hóa hình ảnh cần câu động do đã vẽ sẵn trong animation sheet
 
         if (shouldShow)
         {
@@ -815,10 +840,10 @@ public class PlayerController25D : MonoBehaviour
     private Sprite GetBobberSprite(string bobberId)
     {
 #if UNITY_EDITOR
-        string path = "Assets/Model/Fishes/fish_bobber-standard.png";
+        string path = "Assets/Model/bobber-removebg-preview.png";
         switch (bobberId)
         {
-            case "fish_bobber_standard": path = "Assets/Model/Fishes/fish_bobber-standard.png"; break;
+            case "fish_bobber_standard": path = "Assets/Model/bobber-removebg-preview.png"; break;
             case "fish_bobber_bluecork": path = "Assets/Model/Fishes/fish_bobber-bluecork.png"; break;
             case "fish_bobber_clover": path = "Assets/Model/Fishes/fish_bobber-clover.png"; break;
             case "fish_bobber_donut": path = "Assets/Model/Fishes/fish_bobber-donut.png"; break;

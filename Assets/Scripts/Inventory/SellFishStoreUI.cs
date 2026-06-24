@@ -45,6 +45,7 @@ namespace InventorySystem
 
         // Track original inventory index for each displayed slot
         private List<int> slotInventoryIndices = new List<int>();
+        private List<ItemData> catalogFishItems = new List<ItemData>();
 
         private void Awake()
         {
@@ -81,6 +82,9 @@ namespace InventorySystem
             {
                 Debug.LogWarning("SellFishStoreUI: Could not load Item_Slot-5.png sprite, using default.");
             }
+
+            // Initialize fish catalog
+            InitializeCatalog();
 
             // Construct UI elements
             CreateInteractionPrompt();
@@ -358,7 +362,7 @@ namespace InventorySystem
             bodyRt.offsetMin = new Vector2(30, 30);
             bodyRt.offsetMax = new Vector2(-30, 0);
 
-            // LEFT SIDE: Grid container
+            // LEFT SIDE: Grid container (now scrollable)
             GameObject gridContainerGo = new GameObject("GridContainer");
             gridContainerGo.transform.SetParent(bodyGo.transform, false);
             RectTransform gridContainerRt = gridContainerGo.AddComponent<RectTransform>();
@@ -371,15 +375,37 @@ namespace InventorySystem
             Image gridBackplate = gridContainerGo.AddComponent<Image>();
             gridBackplate.color = new Color(0.06f, 0.06f, 0.08f, 0.85f); // Soft frame backplate
 
+            // Add Scroll View Components
+            gridContainerGo.AddComponent<RectMask2D>();
+            ScrollRect scrollRect = gridContainerGo.AddComponent<ScrollRect>();
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+
+            // Grid Content GameObject
+            GameObject contentGo = new GameObject("GridContent");
+            contentGo.transform.SetParent(gridContainerGo.transform, false);
+            RectTransform contentRt = contentGo.AddComponent<RectTransform>();
+            contentRt.anchorMin = new Vector2(0f, 1f);
+            contentRt.anchorMax = new Vector2(1f, 1f);
+            contentRt.pivot = new Vector2(0.5f, 1f);
+            contentRt.anchoredPosition = Vector2.zero;
+            contentRt.sizeDelta = new Vector2(0f, 300f);
+
+            scrollRect.content = contentRt;
+
             // Setup Grid Layout
-            gridParent = gridContainerGo.transform;
-            GridLayoutGroup gridLayout = gridContainerGo.AddComponent<GridLayoutGroup>();
+            gridParent = contentGo.transform;
+            GridLayoutGroup gridLayout = contentGo.AddComponent<GridLayoutGroup>();
             gridLayout.padding = new RectOffset(18, 18, 18, 18);
             gridLayout.cellSize = new Vector2(74, 74);
             gridLayout.spacing = new Vector2(10, 10);
             gridLayout.startCorner = GridLayoutGroup.Corner.UpperLeft;
             gridLayout.startAxis = GridLayoutGroup.Axis.Horizontal;
             gridLayout.childAlignment = TextAnchor.UpperLeft;
+
+            ContentSizeFitter fitter = contentGo.AddComponent<ContentSizeFitter>();
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+            fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
 
             // RIGHT SIDE: Details panel
             detailsPanel = new GameObject("DetailsPanel");
@@ -506,7 +532,8 @@ namespace InventorySystem
             SetupButtonColors(closeBtn, new Color(0.75f, 0.15f, 0.15f));
 
             // Generate slots
-            for (int i = 0; i < 24; i++)
+            int totalSlots = catalogFishItems.Count;
+            for (int i = 0; i < totalSlots; i++)
             {
                 GameObject slotGo = new GameObject($"ShopSlot_{i}");
                 slotGo.transform.SetParent(gridParent, false);
@@ -539,6 +566,16 @@ namespace InventorySystem
                 slotQtyText.fontStyle = FontStyles.Bold;
                 slotQtyText.gameObject.SetActive(false);
 
+                // Price Text
+                TextMeshProUGUI slotPriceText = CreateText(slotGo.transform, "Price", "0g", 12, new Color(1f, 0.85f, 0f), TextAlignmentOptions.BottomLeft);
+                RectTransform slotPriceRt = slotPriceText.GetComponent<RectTransform>();
+                slotPriceRt.anchorMin = Vector2.zero;
+                slotPriceRt.anchorMax = Vector2.one;
+                slotPriceRt.offsetMin = new Vector2(6, 2);
+                slotPriceRt.offsetMax = Vector2.zero;
+                slotPriceText.fontStyle = FontStyles.Bold;
+                slotPriceText.gameObject.SetActive(false);
+
                 // Selection Glow
                 GameObject glowGo = new GameObject("SelectionGlow");
                 glowGo.transform.SetParent(slotGo.transform, false);
@@ -556,6 +593,7 @@ namespace InventorySystem
                 slotUI.GetType().GetField("itemIcon", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(slotUI, slotIconImg);
                 slotUI.GetType().GetField("quantityText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(slotUI, slotQtyText);
                 slotUI.GetType().GetField("selectionGlow", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(slotUI, glowImg);
+                slotUI.GetType().GetField("priceText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(slotUI, slotPriceText);
 
                 slotUI.Initialize(i, this);
                 slotUIList.Add(slotUI);
@@ -587,27 +625,15 @@ namespace InventorySystem
         {
             if (!isOpen || playerInventory == null) return;
 
-            // Filter inventory slots to get only caught fish
-            slotInventoryIndices.Clear();
-            List<InventorySlot> fishSlots = new List<InventorySlot>();
-
-            for (int i = 0; i < playerInventory.Slots.Count; i++)
-            {
-                InventorySlot slot = playerInventory.Slots[i];
-                if (!slot.IsEmpty && IsFish(slot.itemData))
-                {
-                    fishSlots.Add(slot);
-                    slotInventoryIndices.Add(i);
-                }
-            }
-
-            // Bind values to Slot UI instances
+            // Bind values to Slot UI instances from the catalog
             for (int i = 0; i < slotUIList.Count; i++)
             {
-                if (i < fishSlots.Count)
+                if (i < catalogFishItems.Count)
                 {
+                    ItemData fishItem = catalogFishItems[i];
+                    int qty = GetOwnedQuantityOfFish(fishItem.id);
                     slotUIList[i].gameObject.SetActive(true);
-                    slotUIList[i].SetItem(fishSlots[i]);
+                    slotUIList[i].SetItem(fishItem, qty);
                 }
                 else
                 {
@@ -617,7 +643,7 @@ namespace InventorySystem
             }
 
             // If selected slot is now empty or inactive, deselect
-            if (selectedSlotUI != null && (!selectedSlotUI.gameObject.activeSelf || selectedSlotUI.CurrentSlot == null || selectedSlotUI.CurrentSlot.IsEmpty))
+            if (selectedSlotUI != null && (!selectedSlotUI.gameObject.activeSelf || selectedSlotUI.CurrentItemData == null))
             {
                 DeselectAll();
             }
@@ -649,7 +675,7 @@ namespace InventorySystem
 
         public void SelectSlot(SellFishSlotUI clickedSlot)
         {
-            if (clickedSlot == null || clickedSlot.CurrentSlot == null || clickedSlot.CurrentSlot.IsEmpty)
+            if (clickedSlot == null || clickedSlot.CurrentItemData == null)
             {
                 DeselectAll();
                 return;
@@ -663,7 +689,7 @@ namespace InventorySystem
             selectedSlotUI = clickedSlot;
             selectedSlotUI.SetSelected(true);
 
-            UpdateDetailsPanel(selectedSlotUI.CurrentSlot.itemData);
+            UpdateDetailsPanel(selectedSlotUI.CurrentItemData);
         }
 
         public void DeselectAll()
@@ -704,48 +730,46 @@ namespace InventorySystem
             detailDescText.text = item.description;
             detailPriceText.text = $"Price: <color=#FFD700>{item.sellPrice}</color> Gold";
 
-            sell1Button.interactable = true;
-            sellAllButton.interactable = true;
+            int quantityOwned = GetOwnedQuantityOfFish(item.id);
+            if (quantityOwned > 0)
+            {
+                sell1Button.interactable = true;
+                sellAllButton.interactable = true;
+            }
+            else
+            {
+                sell1Button.interactable = false;
+                sellAllButton.interactable = false;
+            }
         }
 
         private void SellOneSelected()
         {
-            if (selectedSlotUI == null || selectedSlotUI.CurrentSlot == null || playerInventory == null) return;
+            if (selectedSlotUI == null || selectedSlotUI.CurrentItemData == null || playerInventory == null) return;
 
-            int slotIndex = selectedSlotUI.SlotIndex;
-            if (slotIndex < 0 || slotIndex >= slotInventoryIndices.Count) return;
+            ItemData fish = selectedSlotUI.CurrentItemData;
+            int quantityOwned = GetOwnedQuantityOfFish(fish.id);
+            if (quantityOwned <= 0) return;
 
-            int originalInventoryIndex = slotInventoryIndices[slotIndex];
-            ItemData fish = selectedSlotUI.CurrentSlot.itemData;
-
-            // Process Transaction
-            playerInventory.RemoveItem(originalInventoryIndex, 1);
+            RemoveFishFromInventory(fish.id, 1);
             playerInventory.AddGold(fish.sellPrice);
 
-            // Play float text or sound (Optional fallback check)
             PlaySellSound();
-
             RefreshShopUI();
         }
 
         private void SellAllSelected()
         {
-            if (selectedSlotUI == null || selectedSlotUI.CurrentSlot == null || playerInventory == null) return;
+            if (selectedSlotUI == null || selectedSlotUI.CurrentItemData == null || playerInventory == null) return;
 
-            int slotIndex = selectedSlotUI.SlotIndex;
-            if (slotIndex < 0 || slotIndex >= slotInventoryIndices.Count) return;
+            ItemData fish = selectedSlotUI.CurrentItemData;
+            int quantityOwned = GetOwnedQuantityOfFish(fish.id);
+            if (quantityOwned <= 0) return;
 
-            int originalInventoryIndex = slotInventoryIndices[slotIndex];
-            ItemData fish = selectedSlotUI.CurrentSlot.itemData;
-            int quantityToSell = selectedSlotUI.CurrentSlot.quantity;
+            RemoveFishFromInventory(fish.id, quantityOwned);
+            playerInventory.AddGold(fish.sellPrice * quantityOwned);
 
-            // Process Transaction
-            playerInventory.RemoveItem(originalInventoryIndex, quantityToSell);
-            playerInventory.AddGold(fish.sellPrice * quantityToSell);
-
-            // Play float text or sound
             PlaySellSound();
-
             RefreshShopUI();
         }
 
@@ -793,6 +817,139 @@ namespace InventorySystem
             tmp.font = GetDefaultFontAsset();
 
             return tmp;
+        }
+
+        private void InitializeCatalog()
+        {
+            catalogFishItems.Clear();
+            string folderPath = System.IO.Path.Combine(Application.dataPath, "Model/Fishes");
+            if (System.IO.Directory.Exists(folderPath))
+            {
+                string[] files = System.IO.Directory.GetFiles(folderPath, "fish_fishing-*.png");
+                foreach (string filePath in files)
+                {
+                    string filename = System.IO.Path.GetFileNameWithoutExtension(filePath);
+                    string rawName = filename.Replace("fish_fishing-", "");
+                    string fishName = FormatFishName(rawName);
+                    
+                    // Relative path for AssetDatabase
+                    string relativePath = "Assets/Model/Fishes/" + System.IO.Path.GetFileName(filePath);
+                    Sprite sprite = null;
+#if UNITY_EDITOR
+                    sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(relativePath);
+#endif
+                    
+                    // Create ItemData
+                    ItemData fishItem = ScriptableObject.CreateInstance<ItemData>();
+                    fishItem.id = "fish_" + fishName.Replace(" ", "_").ToLower();
+                    fishItem.itemName = fishName;
+                    fishItem.description = $"A fresh caught {fishName}. Can be used for cooking or trading.";
+                    fishItem.type = ItemType.Material;
+                    
+                    // Determine rarity & price
+                    if (fishName.Contains("Shark") || fishName.Contains("Ray") || fishName.Contains("Dinosaur"))
+                    {
+                        fishItem.rarity = Rarity.Legendary;
+                        fishItem.sellPrice = 500;
+                    }
+                    else if (fishName.Contains("Salmon") || fishName.Contains("Trout") || fishName.Contains("Eel") || fishName.Contains("Pike"))
+                    {
+                        fishItem.rarity = Rarity.Epic;
+                        fishItem.sellPrice = 150;
+                    }
+                    else if (fishName.Contains("Bass") || fishName.Contains("Gar") || fishName.Contains("Porgy") || fishName.Contains("Snapper") || fishName.Contains("Perch"))
+                    {
+                        fishItem.rarity = Rarity.Rare;
+                        fishItem.sellPrice = 50;
+                    }
+                    else
+                    {
+                        fishItem.rarity = Rarity.Common;
+                        fishItem.sellPrice = 15;
+                    }
+
+                    fishItem.icon = sprite;
+                    catalogFishItems.Add(fishItem);
+                }
+
+                // Sort by sell price ascending (and alphabetically by name if prices are equal)
+                catalogFishItems.Sort((a, b) => {
+                    int priceCompare = a.sellPrice.CompareTo(b.sellPrice);
+                    if (priceCompare != 0) return priceCompare;
+                    return string.Compare(a.itemName, b.itemName, System.StringComparison.OrdinalIgnoreCase);
+                });
+            }
+        }
+
+        private string FormatFishName(string rawName)
+        {
+            if (string.IsNullOrEmpty(rawName)) return "";
+            
+            string[] words = rawName.Split(new char[] { '-', '_' }, System.StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (words[i].Length > 0)
+                {
+                    words[i] = char.ToUpper(words[i][0]) + words[i].Substring(1);
+                }
+            }
+            string formatted = string.Join(" ", words);
+
+            if (formatted.Equals("Bigmouthbass", System.StringComparison.OrdinalIgnoreCase)) return "Bigmouth Bass";
+            if (formatted.Equals("Blackspottedeel", System.StringComparison.OrdinalIgnoreCase)) return "Black Spotted Eel";
+            if (formatted.Equals("Brooktrout", System.StringComparison.OrdinalIgnoreCase)) return "Brook Trout";
+            if (formatted.Equals("Brownray", System.StringComparison.OrdinalIgnoreCase)) return "Brown Ray";
+            if (formatted.Equals("Kingsalmon", System.StringComparison.OrdinalIgnoreCase)) return "King Salmon";
+            if (formatted.Equals("Longnosegar", System.StringComparison.OrdinalIgnoreCase)) return "Longnose Gar";
+            if (formatted.Equals("Northernpike", System.StringComparison.OrdinalIgnoreCase)) return "Northern Pike";
+            if (formatted.Equals("Pinksalmon", System.StringComparison.OrdinalIgnoreCase)) return "Pink Salmon";
+            if (formatted.Equals("Pufferfish", System.StringComparison.OrdinalIgnoreCase)) return "Puffer Fish";
+            if (formatted.Equals("Rainbowtrout", System.StringComparison.OrdinalIgnoreCase)) return "Rainbow Trout";
+            if (formatted.Equals("Redlionfish", System.StringComparison.OrdinalIgnoreCase)) return "Red Lionfish";
+            if (formatted.Equals("Redporgy", System.StringComparison.OrdinalIgnoreCase)) return "Red Porgy";
+            if (formatted.Equals("Redsnapper", System.StringComparison.OrdinalIgnoreCase)) return "Red Snapper";
+            if (formatted.Equals("Sandbarshark", System.StringComparison.OrdinalIgnoreCase)) return "Sandbar Shark";
+            if (formatted.Equals("Sharptoothcatfish", System.StringComparison.OrdinalIgnoreCase)) return "Sharptooth Catfish";
+            if (formatted.Equals("Sockeyesalmon", System.StringComparison.OrdinalIgnoreCase)) return "Sockeye Salmon";
+            if (formatted.Equals("Spadefish", System.StringComparison.OrdinalIgnoreCase)) return "Spade Fish";
+            if (formatted.Equals("Spotcroacker", System.StringComparison.OrdinalIgnoreCase)) return "Spot Croacker";
+            if (formatted.Equals("Yellowperch", System.StringComparison.OrdinalIgnoreCase)) return "Yellow Perch";
+
+            return formatted;
+        }
+
+        private int GetOwnedQuantityOfFish(string fishId)
+        {
+            if (playerInventory == null) return 0;
+            int total = 0;
+            foreach (var slot in playerInventory.Slots)
+            {
+                if (!slot.IsEmpty && slot.itemData.id == fishId)
+                {
+                    total += slot.quantity;
+                }
+            }
+            return total;
+        }
+
+        private void RemoveFishFromInventory(string fishId, int amount)
+        {
+            if (playerInventory == null) return;
+            int remainingToRemove = amount;
+
+            for (int i = 0; i < playerInventory.Slots.Count; i++)
+            {
+                var slot = playerInventory.Slots[i];
+                if (!slot.IsEmpty && slot.itemData.id == fishId)
+                {
+                    int toRemove = Mathf.Min(remainingToRemove, slot.quantity);
+                    playerInventory.RemoveItem(i, toRemove);
+                    remainingToRemove -= toRemove;
+
+                    if (remainingToRemove <= 0)
+                        break;
+                }
+            }
         }
     }
 }

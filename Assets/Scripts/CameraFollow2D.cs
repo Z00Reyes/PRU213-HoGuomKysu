@@ -65,6 +65,13 @@ public class CameraFollow2D : MonoBehaviour
     {
         if (enableZoom && cam != null)
         {
+            // Do not zoom camera if pointer is over a UI element (like the shop scroll view)
+            if (UnityEngine.EventSystems.EventSystem.current != null && 
+                UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+
             float scrollInput = Input.GetAxis("Mouse ScrollWheel");
             if (Mathf.Abs(scrollInput) > 0.01f)
             {
