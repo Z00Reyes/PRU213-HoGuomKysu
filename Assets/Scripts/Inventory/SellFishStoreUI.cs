@@ -75,12 +75,10 @@ namespace InventorySystem
             }
 
             // Load Slot Sprite
-#if UNITY_EDITOR
-            slotBgSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ItemSlots/ItemSlots/Item_Slot-5.png");
-#endif
+            slotBgSprite = Resources.Load<Sprite>("Sprites/ItemSlots/Item_Slot-5");
             if (slotBgSprite == null)
             {
-                Debug.LogWarning("SellFishStoreUI: Could not load Item_Slot-5.png sprite, using default.");
+                Debug.LogWarning("SellFishStoreUI: Could not load Item_Slot-5.png sprite from Resources, using default.");
             }
 
             // Initialize fish catalog
@@ -822,62 +820,61 @@ namespace InventorySystem
         private void InitializeCatalog()
         {
             catalogFishItems.Clear();
-            string folderPath = System.IO.Path.Combine(Application.dataPath, "Model/Fishes");
-            if (System.IO.Directory.Exists(folderPath))
-            {
-                string[] files = System.IO.Directory.GetFiles(folderPath, "fish_fishing-*.png");
-                foreach (string filePath in files)
-                {
-                    string filename = System.IO.Path.GetFileNameWithoutExtension(filePath);
-                    string rawName = filename.Replace("fish_fishing-", "");
-                    string fishName = FormatFishName(rawName);
-                    
-                    // Relative path for AssetDatabase
-                    string relativePath = "Assets/Model/Fishes/" + System.IO.Path.GetFileName(filePath);
-                    Sprite sprite = null;
-#if UNITY_EDITOR
-                    sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(relativePath);
-#endif
-                    
-                    // Create ItemData
-                    ItemData fishItem = ScriptableObject.CreateInstance<ItemData>();
-                    fishItem.id = "fish_" + fishName.Replace(" ", "_").ToLower();
-                    fishItem.itemName = fishName;
-                    fishItem.description = $"A fresh caught {fishName}. Can be used for cooking or trading.";
-                    fishItem.type = ItemType.Material;
-                    
-                    // Determine rarity & price
-                    if (fishName.Contains("Shark") || fishName.Contains("Ray") || fishName.Contains("Dinosaur"))
-                    {
-                        fishItem.rarity = Rarity.Legendary;
-                        fishItem.sellPrice = 500;
-                    }
-                    else if (fishName.Contains("Salmon") || fishName.Contains("Trout") || fishName.Contains("Eel") || fishName.Contains("Pike"))
-                    {
-                        fishItem.rarity = Rarity.Epic;
-                        fishItem.sellPrice = 150;
-                    }
-                    else if (fishName.Contains("Bass") || fishName.Contains("Gar") || fishName.Contains("Porgy") || fishName.Contains("Snapper") || fishName.Contains("Perch"))
-                    {
-                        fishItem.rarity = Rarity.Rare;
-                        fishItem.sellPrice = 50;
-                    }
-                    else
-                    {
-                        fishItem.rarity = Rarity.Common;
-                        fishItem.sellPrice = 15;
-                    }
 
-                    fishItem.icon = sprite;
-                    catalogFishItems.Add(fishItem);
+            // Load all fish sprites from Resources folder (works in both Editor and builds)
+            Sprite[] fishSprites = Resources.LoadAll<Sprite>("Sprites/Fishes");
+            foreach (Sprite sprite in fishSprites)
+            {
+                string filename = sprite.name;
+                // Only process fish_fishing-* sprites
+                if (!filename.StartsWith("fish_fishing-")) continue;
+
+                string rawName = filename.Replace("fish_fishing-", "");
+                string fishName = FormatFishName(rawName);
+
+                // Create ItemData
+                ItemData fishItem = ScriptableObject.CreateInstance<ItemData>();
+                fishItem.id = "fish_" + fishName.Replace(" ", "_").ToLower();
+                fishItem.itemName = fishName;
+                fishItem.description = $"A fresh caught {fishName}. Can be used for cooking or trading.";
+                fishItem.type = ItemType.Material;
+
+                // Determine rarity & price
+                if (fishName.Contains("Shark") || fishName.Contains("Ray") || fishName.Contains("Dinosaur"))
+                {
+                    fishItem.rarity = Rarity.Legendary;
+                    fishItem.sellPrice = 500;
+                }
+                else if (fishName.Contains("Salmon") || fishName.Contains("Trout") || fishName.Contains("Eel") || fishName.Contains("Pike"))
+                {
+                    fishItem.rarity = Rarity.Epic;
+                    fishItem.sellPrice = 150;
+                }
+                else if (fishName.Contains("Bass") || fishName.Contains("Gar") || fishName.Contains("Porgy") || fishName.Contains("Snapper") || fishName.Contains("Perch"))
+                {
+                    fishItem.rarity = Rarity.Rare;
+                    fishItem.sellPrice = 50;
+                }
+                else
+                {
+                    fishItem.rarity = Rarity.Common;
+                    fishItem.sellPrice = 15;
                 }
 
-                // Sort by sell price ascending (and alphabetically by name if prices are equal)
-                catalogFishItems.Sort((a, b) => {
-                    int priceCompare = a.sellPrice.CompareTo(b.sellPrice);
-                    if (priceCompare != 0) return priceCompare;
-                    return string.Compare(a.itemName, b.itemName, System.StringComparison.OrdinalIgnoreCase);
-                });
+                fishItem.icon = sprite;
+                catalogFishItems.Add(fishItem);
+            }
+
+            // Sort by sell price ascending (and alphabetically by name if prices are equal)
+            catalogFishItems.Sort((a, b) => {
+                int priceCompare = a.sellPrice.CompareTo(b.sellPrice);
+                if (priceCompare != 0) return priceCompare;
+                return string.Compare(a.itemName, b.itemName, System.StringComparison.OrdinalIgnoreCase);
+            });
+
+            if (catalogFishItems.Count == 0)
+            {
+                Debug.LogWarning("SellFishStoreUI: No fish sprites found in Resources/Sprites/Fishes/. Make sure fish PNGs are in the Resources folder.");
             }
         }
 

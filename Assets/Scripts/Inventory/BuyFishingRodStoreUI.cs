@@ -72,12 +72,10 @@ namespace InventorySystem
             }
 
             // Load Slot Sprite
-#if UNITY_EDITOR
-            slotBgSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ItemSlots/ItemSlots/Item_Slot-6.png");
-#endif
+            slotBgSprite = Resources.Load<Sprite>("Sprites/ItemSlots/Item_Slot-6");
             if (slotBgSprite == null)
             {
-                Debug.LogWarning("BuyFishingRodStoreUI: Could not load Item_Slot-6.png sprite, using default.");
+                Debug.LogWarning("BuyFishingRodStoreUI: Could not load Item_Slot-6.png sprite from Resources, using default.");
             }
 
             // Define items in the shop
@@ -794,36 +792,33 @@ namespace InventorySystem
 
         private Sprite GetItemSprite(string id, bool isBobber)
         {
-#if UNITY_EDITOR
-            string path = "";
+            string resourceName = "";
             if (isBobber)
             {
                 switch (id)
                 {
-                    case "fish_bobber_standard": path = "Assets/Model/Fishes/fish_bobber-standard.png"; break;
-                    case "fish_bobber_bluecork": path = "Assets/Model/Fishes/fish_bobber-bluecork.png"; break;
-                    case "fish_bobber_clover": path = "Assets/Model/Fishes/fish_bobber-clover.png"; break;
-                    case "fish_bobber_donut": path = "Assets/Model/Fishes/fish_bobber-donut.png"; break;
-                    case "fish_bobber_rainbow": path = "Assets/Model/Fishes/fish_bobber-rainbow.png"; break;
-                    case "fish_bobber_crystal": path = "Assets/Model/Fishes/fish_bobber-crystal.png"; break;
+                    case "fish_bobber_standard": resourceName = "fish_bobber-standard"; break;
+                    case "fish_bobber_bluecork": resourceName = "fish_bobber-bluecork"; break;
+                    case "fish_bobber_clover": resourceName = "fish_bobber-clover"; break;
+                    case "fish_bobber_donut": resourceName = "fish_bobber-donut"; break;
+                    case "fish_bobber_rainbow": resourceName = "fish_bobber-rainbow"; break;
+                    case "fish_bobber_crystal": resourceName = "fish_bobber-crystal"; break;
                 }
             }
             else
             {
                 switch (id)
                 {
-                    case "fishing_rod_bamboo": path = "Assets/Model/Fishes/fishing_icons_32x32_6.png"; break;
-                    case "fishing_rod_fiberglass": path = "Assets/Model/Fishes/fishing_icons_32x32_7.png"; break;
-                    case "fishing_rod_carbon": path = "Assets/Model/Fishes/fishing_icons_32x32_8.png"; break;
-                    case "fishing_rod_master": path = "Assets/Model/Fishes/fishing_icons_32x32_18.png"; break;
-                    case "fishing_rod_golden": path = "Assets/Model/Fishes/fishing_icons_32x32_19.png"; break;
-                    case "fishing_rod_lava": path = "Assets/Model/Fishes/fishing_icons_32x32_20.png"; break;
+                    case "fishing_rod_bamboo": resourceName = "fishing_icons_32x32_6"; break;
+                    case "fishing_rod_fiberglass": resourceName = "fishing_icons_32x32_7"; break;
+                    case "fishing_rod_carbon": resourceName = "fishing_icons_32x32_8"; break;
+                    case "fishing_rod_master": resourceName = "fishing_icons_32x32_18"; break;
+                    case "fishing_rod_golden": resourceName = "fishing_icons_32x32_19"; break;
+                    case "fishing_rod_lava": resourceName = "fishing_icons_32x32_20"; break;
                 }
             }
-            return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
-#else
-            return null;
-#endif
+            if (string.IsNullOrEmpty(resourceName)) return null;
+            return Resources.Load<Sprite>("Sprites/Fishes/" + resourceName);
         }
 
         private static TMP_FontAsset GetDefaultFontAsset()
