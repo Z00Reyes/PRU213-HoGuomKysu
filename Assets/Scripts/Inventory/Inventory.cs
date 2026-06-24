@@ -16,11 +16,50 @@ namespace InventorySystem
     {
         [SerializeField] private int slotCount = 24;
         [SerializeField] private List<InventorySlot> slots = new List<InventorySlot>();
+        
+        [Header("Economy")]
+        [SerializeField] private int gold = 100;
+        public int Gold => gold;
+        public event Action<int> onGoldChanged;
+
+        [Header("Equipment")]
+        public string equippedRodId = "";
+        public string equippedBobberId = "";
+        [SerializeField] private List<string> purchasedItemIds = new List<string>();
+
+        public List<string> PurchasedItemIds => purchasedItemIds;
 
         public event Action onInventoryChanged;
 
         public List<InventorySlot> Slots => slots;
         public int SlotCount => slotCount;
+
+        public void AddGold(int amount)
+        {
+            gold += amount;
+            onGoldChanged?.Invoke(gold);
+        }
+
+        public bool RemoveGold(int amount)
+        {
+            if (gold < amount) return false;
+            gold -= amount;
+            onGoldChanged?.Invoke(gold);
+            return true;
+        }
+
+        public void PurchaseItem(string itemId)
+        {
+            if (!purchasedItemIds.Contains(itemId))
+            {
+                purchasedItemIds.Add(itemId);
+            }
+        }
+
+        public bool IsItemPurchased(string itemId)
+        {
+            return purchasedItemIds.Contains(itemId);
+        }
 
         private void Awake()
         {
