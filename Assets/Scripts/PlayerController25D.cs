@@ -466,6 +466,7 @@ public class PlayerController25D : MonoBehaviour
                 lineRenderer.enabled = false;
             }
         }
+        UpdateEquippedRodVisual();
     }
 
     private void SpawnBobber()
@@ -485,6 +486,13 @@ public class PlayerController25D : MonoBehaviour
 
         Vector3 targetPos = transform.position + facingDir * castDistance;
         targetPos.y = transform.position.y + bobberYOffset; // Đáp xuống mặt đất/nước có offset
+
+        // Load custom bobber sprite
+        var inv = GetComponent<InventorySystem.Inventory>();
+        if (inv != null)
+        {
+            bobberSprite = GetBobberSprite(inv.equippedBobberId);
+        }
 
         // Tạo GameObject phao câu
         currentBobber = new GameObject("FishingBobber");
@@ -728,8 +736,107 @@ public class PlayerController25D : MonoBehaviour
         return fishItem;
     }
 
+    [Header("Equipped Rod Visual")]
+    private GameObject equippedRodVisualGo;
+    private SpriteRenderer equippedRodVisualSr;
+
+    private void UpdateEquippedRodVisual()
+    {
+        var inv = GetComponent<InventorySystem.Inventory>();
+        if (inv == null) return;
+
+        bool shouldShow = (fishingState != FishingState.Idle && fishingState != FishingState.CatchSuccess && fishingState != FishingState.CatchFailure) && hasRod && !string.IsNullOrEmpty(inv.equippedRodId);
+
+        if (shouldShow)
+        {
+            if (equippedRodVisualGo == null)
+            {
+                equippedRodVisualGo = new GameObject("EquippedRodVisual");
+                equippedRodVisualSr = equippedRodVisualGo.AddComponent<SpriteRenderer>();
+                equippedRodVisualSr.sortingOrder = 11; // Overlay on top of player character
+            }
+
+            Sprite rodSprite = GetRodSprite(inv.equippedRodId);
+            if (equippedRodVisualSr.sprite != rodSprite)
+            {
+                equippedRodVisualSr.sprite = rodSprite;
+            }
+
+            equippedRodVisualGo.SetActive(true);
+
+            // Compute math to stretch sprite from player's hand to active rod tip in world space
+            Vector3 handPos = transform.position + new Vector3(0f, 0.8f, -0.05f);
+            Vector3 tipPos = GetRodTipPosition();
+
+            Vector3 direction = tipPos - handPos;
+            float distance = direction.magnitude;
+
+            // Position at the midpoint so standard center pivot works perfectly
+            Vector3 midpoint = (handPos + tipPos) / 2f;
+            equippedRodVisualGo.transform.position = midpoint;
+
+            // Rotate to point from hand to tip (diagonal 45 deg sprites)
+            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+            equippedRodVisualGo.transform.rotation = Quaternion.Euler(0f, 0f, angle - 45f);
+
+            // Stretch scale. 32x32 sprite at 100 PPu has diagonal length approx 0.45 units
+            float spriteLength = 0.45f;
+            float scaleVal = distance / spriteLength;
+            equippedRodVisualGo.transform.localScale = new Vector3(scaleVal, scaleVal, 1f);
+        }
+        else
+        {
+            if (equippedRodVisualGo != null && equippedRodVisualGo.activeSelf)
+            {
+                equippedRodVisualGo.SetActive(false);
+            }
+        }
+    }
+
+    private Sprite GetRodSprite(string rodId)
+    {
+#if UNITY_EDITOR
+        string path = "Assets/Model/Fishes/fishing_icons_32x32_6.png";
+        switch (rodId)
+        {
+            case "fishing_rod_bamboo": path = "Assets/Model/Fishes/fishing_icons_32x32_6.png"; break;
+            case "fishing_rod_fiberglass": path = "Assets/Model/Fishes/fishing_icons_32x32_7.png"; break;
+            case "fishing_rod_carbon": path = "Assets/Model/Fishes/fishing_icons_32x32_8.png"; break;
+            case "fishing_rod_master": path = "Assets/Model/Fishes/fishing_icons_32x32_18.png"; break;
+            case "fishing_rod_golden": path = "Assets/Model/Fishes/fishing_icons_32x32_19.png"; break;
+            case "fishing_rod_lava": path = "Assets/Model/Fishes/fishing_icons_32x32_20.png"; break;
+        }
+        return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
+#else
+        return null;
+#endif
+    }
+
+    private Sprite GetBobberSprite(string bobberId)
+    {
+#if UNITY_EDITOR
+        string path = "Assets/Model/Fishes/fish_bobber-standard.png";
+        switch (bobberId)
+        {
+            case "fish_bobber_standard": path = "Assets/Model/Fishes/fish_bobber-standard.png"; break;
+            case "fish_bobber_bluecork": path = "Assets/Model/Fishes/fish_bobber-bluecork.png"; break;
+            case "fish_bobber_clover": path = "Assets/Model/Fishes/fish_bobber-clover.png"; break;
+            case "fish_bobber_donut": path = "Assets/Model/Fishes/fish_bobber-donut.png"; break;
+            case "fish_bobber_rainbow": path = "Assets/Model/Fishes/fish_bobber-rainbow.png"; break;
+            case "fish_bobber_crystal": path = "Assets/Model/Fishes/fish_bobber-crystal.png"; break;
+        }
+        return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
+#else
+        return null;
+#endif
+    }
+
     void OnDestroy()
     {
         DestroyBobber();
+        if (equippedRodVisualGo != null)
+        {
+            Destroy(equippedRodVisualGo);
+        }
     }
 }

@@ -38,6 +38,9 @@ namespace InventorySystem
         public string statLabel;
         public int statValue;
 
+        [Header("Economy")]
+        public int sellPrice = 10;
+
         public virtual void Use()
         {
             Debug.Log($"Using item: {itemName}");
