@@ -207,11 +207,7 @@ public class PlayerController25D : MonoBehaviour
                     }
                     else
                     {
-                        // Show warning and reset to Idle
-                        if (ui != null)
-                        {
-                            ui.ShowMessage("MUST CAST INTO WATER!");
-                        }
+                        // Reset to Idle (no UI warning shown)
                         fishingState = FishingState.CatchFailure;
                         biteReactionTimer = 2.0f; // Show warning message for 2 seconds
                     }
@@ -243,7 +239,6 @@ public class PlayerController25D : MonoBehaviour
                     // Fish bites! Start minigame immediately
                     if (ui != null)
                     {
-                        ui.ShowMessage("🎣 BITE!");
                         ui.ShowMinigame();
                     }
                     
