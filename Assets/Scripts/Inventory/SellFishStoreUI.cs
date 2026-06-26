@@ -315,7 +315,7 @@ namespace InventorySystem
             headerRt.anchoredPosition = Vector2.zero;
 
             // Title text
-            TextMeshProUGUI titleText = CreateText(headerGo.transform, "TitleText", "FISH STALL", 28, new Color(1f, 0.85f, 0f));
+            TextMeshProUGUI titleText = CreateText(headerGo.transform, "TitleText", "FISH STALL", 28, new Color(0.08f, 0.08f, 0.1f));
             RectTransform titleRt = titleText.GetComponent<RectTransform>();
             titleRt.anchorMin = new Vector2(0f, 0.5f);
             titleRt.anchorMax = new Vector2(0f, 0.5f);
@@ -324,7 +324,7 @@ namespace InventorySystem
             titleRt.sizeDelta = new Vector2(300, 50);
 
             // Gold display text
-            goldText = CreateText(headerGo.transform, "GoldText", "Total Gold: 0g", 20, new Color(1f, 0.85f, 0f), TextAlignmentOptions.Right);
+            goldText = CreateText(headerGo.transform, "GoldText", "Total Gold: 0g", 20, new Color(0.08f, 0.08f, 0.1f), TextAlignmentOptions.Right);
             RectTransform goldRt = goldText.GetComponent<RectTransform>();
             goldRt.anchorMin = new Vector2(1f, 0.5f);
             goldRt.anchorMax = new Vector2(1f, 0.5f);
@@ -471,7 +471,7 @@ namespace InventorySystem
             rarityRt.anchoredPosition = Vector2.zero;
 
             // Description
-            detailDescText = CreateText(detailsPanel.transform, "ItemDescText", "Choose any fish from your inventory to sell it for gold.", 14, new Color(0.8f, 0.8f, 0.8f), TextAlignmentOptions.Center);
+            detailDescText = CreateText(detailsPanel.transform, "ItemDescText", "Choose any fish from your inventory to sell it for gold.", 14, new Color(0.95f, 0.95f, 0.95f), TextAlignmentOptions.Center);
             RectTransform descRt = detailDescText.GetComponent<RectTransform>();
             descRt.anchorMin = new Vector2(0.08f, 0.32f);
             descRt.anchorMax = new Vector2(0.92f, 0.52f);
@@ -662,7 +662,7 @@ namespace InventorySystem
         {
             if (goldText != null)
             {
-                goldText.text = $"Gold: <color=#FFD700>{currentGold}</color>g";
+                goldText.text = $"Gold: <b>{currentGold}</b>g";
             }
         }
 
@@ -794,7 +794,7 @@ namespace InventorySystem
                 case Rarity.Rare: return new Color(0.2f, 0.6f, 1.0f);
                 case Rarity.Epic: return new Color(0.7f, 0.3f, 0.9f);
                 case Rarity.Legendary: return new Color(1.0f, 0.6f, 0.0f);
-                default: return new Color(0.8f, 0.8f, 0.8f);
+                default: return new Color(0.95f, 0.95f, 0.95f);
             }
         }
 

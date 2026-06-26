@@ -424,7 +424,7 @@ public class FishingMinigameUI : MonoBehaviour
         Text subtitleText = subtitleGo.AddComponent<Text>();
         subtitleText.font = uiFont;
         subtitleText.text = "Press SPACE to continue";
-        subtitleText.color = new Color(0.7f, 0.7f, 0.7f);
+        subtitleText.color = new Color(0.95f, 0.95f, 0.95f);
         subtitleText.fontSize = 13;
         subtitleText.alignment = TextAnchor.MiddleCenter;
     }

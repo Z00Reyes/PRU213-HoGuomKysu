@@ -18,7 +18,7 @@ namespace InventorySystem
         [SerializeField] private Button discardButton;
 
         [Header("Rarity Colors")]
-        [SerializeField] private Color commonColor = new Color(0.8f, 0.8f, 0.8f);
+        [SerializeField] private Color commonColor = new Color(0.95f, 0.95f, 0.95f);
         [SerializeField] private Color rareColor = new Color(0.2f, 0.6f, 1.0f);
         [SerializeField] private Color epicColor = new Color(0.7f, 0.3f, 0.9f);
         [SerializeField] private Color legendaryColor = new Color(1.0f, 0.6f, 0.0f);

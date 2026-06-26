@@ -1,0 +1,1 @@
+Fence bounds size: (1.60, 3.00, 0.80)

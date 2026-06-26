@@ -19,7 +19,7 @@ namespace InventorySystem
         [Header("Aesthetics & Animation")]
         [SerializeField] private float hoverScaleAmount = 1.06f;
         [SerializeField] private float scaleTransitionTime = 0.1f;
-        [SerializeField] private Color commonColor = new Color(0.7f, 0.7f, 0.7f, 1.0f);
+        [SerializeField] private Color commonColor = new Color(0.95f, 0.95f, 0.95f, 1.0f);
         [SerializeField] private Color rareColor = new Color(0.2f, 0.6f, 1.0f, 1.0f);
         [SerializeField] private Color epicColor = new Color(0.6f, 0.2f, 0.8f, 1.0f);
         [SerializeField] private Color legendaryColor = new Color(1.0f, 0.5f, 0.0f, 1.0f);
