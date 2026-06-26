@@ -11,10 +11,26 @@ public class MenuChinh : MonoBehaviour
         SceneManager.LoadScene("MCScence");
     }
 
+    // Hàm xử lý khi bấm nút SETTING
+    public void BamNutSetting()
+    {
+        PauseMenu pm = FindAnyObjectByType<PauseMenu>();
+        if (pm == null)
+        {
+            GameObject go = new GameObject("PauseManager");
+            pm = go.AddComponent<PauseMenu>();
+        }
+        pm.OpenSettings();
+    }
+
     // Hàm xử lý khi bấm nút QUIT
     public void BamNutQuit()
     {
         Debug.Log("Đã thoát game thành công!"); // Lệnh này để kiểm tra trong Unity
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
         Application.Quit(); // Lệnh thoát game thực tế khi xuất file (.exe)
+#endif
     }
 }

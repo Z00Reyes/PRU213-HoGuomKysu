@@ -64,6 +64,17 @@ public class PlayerController25D : MonoBehaviour
 
     void Start()
     {
+        if (FindAnyObjectByType<DayNightCycle>() == null)
+        {
+            GameObject dayNightGo = new GameObject("DayNightManager");
+            dayNightGo.AddComponent<DayNightCycle>();
+        }
+
+        if (FindAnyObjectByType<PauseMenu>() == null)
+        {
+            GameObject pauseMenuGo = new GameObject("PauseManager");
+            pauseMenuGo.AddComponent<PauseMenu>();
+        }
         // Tự động lấy cấu phần Character Controller gắn trên nhân vật
         controller = GetComponent<CharacterController>();
         animator = GetComponent<Animator>();
@@ -326,15 +337,15 @@ public class PlayerController25D : MonoBehaviour
                 // Success condition
                 if (minigameProgress >= 1f)
                 {
-                    if (ui != null) ui.HideMinigame();
-                    
                     // Retrieve reward fish
                     string fishName;
                     Sprite fishSprite = GetRandomFish(out fishName);
+                    var fishItem = GetOrCreateFishItemData(fishName, fishSprite);
 
                     if (ui != null)
                     {
-                        ui.ShowTrophy(fishSprite, fishName);
+                        ui.HideMinigame();
+                        ui.ShowTrophy(fishItem);
                     }
 
                     // Play appropriate catch animation
@@ -351,7 +362,6 @@ public class PlayerController25D : MonoBehaviour
                     }
                     if (playerInventory != null)
                     {
-                        var fishItem = GetOrCreateFishItemData(fishName, fishSprite);
                         bool added = playerInventory.AddItem(fishItem, 1);
                         if (added)
                         {
@@ -652,46 +662,63 @@ public class PlayerController25D : MonoBehaviour
         fishName = "Unknown Fish";
         Sprite sprite = null;
 
-#if UNITY_EDITOR
-        // In editor: use filesystem to enumerate fish files
-        string folderPath = Path.Combine(Application.dataPath, "Model/Fishes");
-        if (Directory.Exists(folderPath))
-        {
-            string[] files = Directory.GetFiles(folderPath, "fish_fishing-*.png");
-            if (files.Length > 0)
-            {
-                string randomFilePath = files[Random.Range(0, files.Length)];
-                
-                // Get relative path for AssetDatabase
-                string relativePath = "Assets" + randomFilePath.Substring(Application.dataPath.Length).Replace('\\', '/');
-                
-                // Format fish name from file name
-                string filename = Path.GetFileNameWithoutExtension(randomFilePath);
-                string rawName = filename.Replace("fish_fishing-", "");
-                
-                fishName = FormatFishName(rawName);
-
-#if UNITY_EDITOR
-                sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(relativePath);
-            }
-        }
-#else
-        // In builds: use Resources.LoadAll to enumerate fish sprites
+        // Use Resources.LoadAll to enumerate fish sprites (works in Editor & Builds)
         Sprite[] fishSprites = Resources.LoadAll<Sprite>("Sprites/Fishes");
-        // Filter only fish_fishing-* sprites
-        var fishingSprites = new System.Collections.Generic.List<Sprite>();
+        var validSprites = new List<Sprite>();
+        
+        int currentLuck = GetCurrentLuckLevel();
+
         foreach (var s in fishSprites)
         {
             if (s.name.StartsWith("fish_fishing-"))
-                fishingSprites.Add(s);
+            {
+                string rawName = s.name.Replace("fish_fishing-", "");
+                string formatted = FormatFishName(rawName);
+                int fishLuck = GetFishLuck(formatted);
+                
+                // Luck filter
+                if (fishLuck <= currentLuck)
+                {
+                    validSprites.Add(s);
+                }
+            }
         }
-        if (fishingSprites.Count > 0)
+
+        // Fallback if none match (should not happen with standard luck 3 and common fish luck 2)
+        if (validSprites.Count == 0 && fishSprites.Length > 0)
         {
-            sprite = fishingSprites[Random.Range(0, fishingSprites.Count)];
+            foreach (var s in fishSprites)
+            {
+                if (s.name.StartsWith("fish_fishing-"))
+                {
+                    validSprites.Add(s);
+                    break; // Just pick the first one
+                }
+            }
+        }
+
+        if (validSprites.Count > 0)
+        {
+            sprite = validSprites[Random.Range(0, validSprites.Count)];
             string rawName = sprite.name.Replace("fish_fishing-", "");
             fishName = FormatFishName(rawName);
+
+            // Determine Size
+            float sizeRoll = Random.value;
+            if (sizeRoll < 0.05f) { // 5% chance
+                fishName = "Giant " + fishName;
+            }
+            else if (sizeRoll < 0.20f) { // 15% chance
+                fishName = "Large " + fishName;
+            }
+            else if (sizeRoll < 0.60f) { // 40% chance
+                // Normal size, no prefix
+            }
+            else { // 40% chance
+                fishName = "Small " + fishName;
+            }
         }
-#endif
+
         return sprite;
     }
     
@@ -804,6 +831,20 @@ public class PlayerController25D : MonoBehaviour
             fishItem.rarity = InventorySystem.Rarity.Common;
             fishItem.sellPrice = 15;
             fishItem.luckScore = 2;
+        }
+
+        // Apply size multipliers
+        if (fishName.StartsWith("Giant ")) {
+            fishItem.sellPrice *= 5;
+            fishItem.description += "\n<color=#FFD700>Size: GIANT (x5 Value!)</color>";
+        } else if (fishName.StartsWith("Large ")) {
+            fishItem.sellPrice *= 2;
+            fishItem.description += "\n<color=#00FF00>Size: Large (x2 Value)</color>";
+        } else if (fishName.StartsWith("Small ")) {
+            fishItem.sellPrice = Mathf.Max(1, fishItem.sellPrice / 2);
+            fishItem.description += "\n<color=#A0A0A0>Size: Small (x0.5 Value)</color>";
+        } else {
+            fishItem.description += "\n<color=#FFFFFF>Size: Normal</color>";
         }
 
         fishItem.maxStackSize = 20; // 20 fish max per slot!
