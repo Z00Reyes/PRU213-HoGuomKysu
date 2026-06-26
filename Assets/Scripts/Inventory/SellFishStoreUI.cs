@@ -725,7 +725,7 @@ namespace InventorySystem
             detailRarityText.text = $"{item.rarity.ToString().ToUpper()} FISH";
             detailRarityText.color = rarityColor;
 
-            detailDescText.text = item.description;
+            detailDescText.text = item.description + $"\n\n<color=#32CD32>Luck: {item.luckScore} ♣</color>";
             detailPriceText.text = $"Price: <color=#FFD700>{item.sellPrice}</color> Gold";
 
             int quantityOwned = GetOwnedQuantityOfFish(item.id);
@@ -825,41 +825,48 @@ namespace InventorySystem
             Sprite[] fishSprites = Resources.LoadAll<Sprite>("Sprites/Fishes");
             foreach (Sprite sprite in fishSprites)
             {
-                string filename = sprite.name;
-                // Only process fish_fishing-* sprites
-                if (!filename.StartsWith("fish_fishing-")) continue;
-
-                string rawName = filename.Replace("fish_fishing-", "");
-                string fishName = FormatFishName(rawName);
-
-                // Create ItemData
-                ItemData fishItem = ScriptableObject.CreateInstance<ItemData>();
-                fishItem.id = "fish_" + fishName.Replace(" ", "_").ToLower();
-                fishItem.itemName = fishName;
-                fishItem.description = $"A fresh caught {fishName}. Can be used for cooking or trading.";
-                fishItem.type = ItemType.Material;
-
-                // Determine rarity & price
-                if (fishName.Contains("Shark") || fishName.Contains("Ray") || fishName.Contains("Dinosaur"))
+                string[] files = System.IO.Directory.GetFiles(folderPath, "fish_fishing-*.png");
+                foreach (string filePath in files)
                 {
-                    fishItem.rarity = Rarity.Legendary;
-                    fishItem.sellPrice = 500;
-                }
-                else if (fishName.Contains("Salmon") || fishName.Contains("Trout") || fishName.Contains("Eel") || fishName.Contains("Pike"))
-                {
-                    fishItem.rarity = Rarity.Epic;
-                    fishItem.sellPrice = 150;
-                }
-                else if (fishName.Contains("Bass") || fishName.Contains("Gar") || fishName.Contains("Porgy") || fishName.Contains("Snapper") || fishName.Contains("Perch"))
-                {
-                    fishItem.rarity = Rarity.Rare;
-                    fishItem.sellPrice = 50;
-                }
-                else
-                {
-                    fishItem.rarity = Rarity.Common;
-                    fishItem.sellPrice = 15;
-                }
+                    string filename = System.IO.Path.GetFileNameWithoutExtension(filePath);
+                    string rawName = filename.Replace("fish_fishing-", "");
+                    string fishName = FormatFishName(rawName);
+                    
+                    // Relative path for AssetDatabase
+                    string relativePath = "Assets/Model/Fishes/" + System.IO.Path.GetFileName(filePath);
+                    Sprite sprite = null;
+#if UNITY_EDITOR
+                    sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(relativePath);
+#endif
+                    
+                    // Create ItemData
+                    ItemData fishItem = ScriptableObject.CreateInstance<ItemData>();
+                    fishItem.id = "fish_" + fishName.Replace(" ", "_").ToLower();
+                    fishItem.itemName = fishName;
+                    fishItem.description = $"A fresh caught {fishName}. Can be used for cooking or trading.";
+                    fishItem.type = ItemType.Material;
+                    
+                    // Determine rarity & price
+                    if (fishName.Contains("Shark") || fishName.Contains("Ray") || fishName.Contains("Dinosaur"))
+                    {
+                        fishItem.rarity = Rarity.Legendary;
+                        fishItem.sellPrice = 500;
+                    }
+                    else if (fishName.Contains("Salmon") || fishName.Contains("Trout") || fishName.Contains("Eel") || fishName.Contains("Pike"))
+                    {
+                        fishItem.rarity = Rarity.Epic;
+                        fishItem.sellPrice = 150;
+                    }
+                    else if (fishName.Contains("Bass") || fishName.Contains("Gar") || fishName.Contains("Porgy") || fishName.Contains("Snapper") || fishName.Contains("Perch"))
+                    {
+                        fishItem.rarity = Rarity.Rare;
+                        fishItem.sellPrice = 50;
+                    }
+                    else
+                    {
+                        fishItem.rarity = Rarity.Common;
+                        fishItem.sellPrice = 15;
+                    }
 
                 fishItem.icon = sprite;
                 catalogFishItems.Add(fishItem);

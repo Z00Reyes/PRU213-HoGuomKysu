@@ -617,6 +617,36 @@ public class PlayerController25D : MonoBehaviour
         animator.Play(clipName);
     }
 
+    private int GetCurrentLuckLevel()
+    {
+        var inv = GetComponent<InventorySystem.Inventory>();
+        if (inv == null) return 3; // Base luck
+        
+        int luck = 0;
+        switch (inv.equippedRodId)
+        {
+            case "fishing_rod_bamboo": luck += 3; break;
+            case "fishing_rod_fiberglass": luck += 5; break;
+            case "fishing_rod_carbon": luck += 7; break;
+            case "fishing_rod_master": luck += 10; break;
+            case "fishing_rod_golden": luck += 15; break;
+            case "fishing_rod_lava": luck += 20; break;
+            default: luck += 3; break;
+        }
+
+        switch (inv.equippedBobberId)
+        {
+            case "fish_bobber_bluecork": luck += 1; break;
+            case "fish_bobber_clover": luck += 2; break;
+            case "fish_bobber_donut": luck += 3; break;
+            case "fish_bobber_rainbow": luck += 4; break;
+            case "fish_bobber_crystal": luck += 5; break;
+            // standard bobber gives +0
+        }
+
+        return luck;
+    }
+
     private Sprite GetRandomFish(out string fishName)
     {
         fishName = "Unknown Fish";
@@ -631,10 +661,17 @@ public class PlayerController25D : MonoBehaviour
             if (files.Length > 0)
             {
                 string randomFilePath = files[Random.Range(0, files.Length)];
+                
+                // Get relative path for AssetDatabase
+                string relativePath = "Assets" + randomFilePath.Substring(Application.dataPath.Length).Replace('\\', '/');
+                
+                // Format fish name from file name
                 string filename = Path.GetFileNameWithoutExtension(randomFilePath);
                 string rawName = filename.Replace("fish_fishing-", "");
+                
                 fishName = FormatFishName(rawName);
-                string relativePath = "Assets" + randomFilePath.Substring(Application.dataPath.Length).Replace('\\', '/');
+
+#if UNITY_EDITOR
                 sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(relativePath);
             }
         }
@@ -656,6 +693,14 @@ public class PlayerController25D : MonoBehaviour
         }
 #endif
         return sprite;
+    }
+    
+    private int GetFishLuck(string fishName)
+    {
+        if (fishName.Contains("Shark") || fishName.Contains("Ray") || fishName.Contains("Dinosaur")) return 15;
+        if (fishName.Contains("Salmon") || fishName.Contains("Trout") || fishName.Contains("Eel") || fishName.Contains("Pike")) return 10;
+        if (fishName.Contains("Bass") || fishName.Contains("Gar") || fishName.Contains("Porgy") || fishName.Contains("Snapper") || fishName.Contains("Perch")) return 6;
+        return 2;
     }
 
     private string FormatFishName(string rawName)
@@ -740,21 +785,25 @@ public class PlayerController25D : MonoBehaviour
         {
             fishItem.rarity = InventorySystem.Rarity.Legendary;
             fishItem.sellPrice = 500;
+            fishItem.luckScore = 15;
         }
         else if (fishName.Contains("Salmon") || fishName.Contains("Trout") || fishName.Contains("Eel") || fishName.Contains("Pike"))
         {
             fishItem.rarity = InventorySystem.Rarity.Epic;
             fishItem.sellPrice = 150;
+            fishItem.luckScore = 10;
         }
         else if (fishName.Contains("Bass") || fishName.Contains("Gar") || fishName.Contains("Porgy") || fishName.Contains("Snapper") || fishName.Contains("Perch"))
         {
             fishItem.rarity = InventorySystem.Rarity.Rare;
             fishItem.sellPrice = 50;
+            fishItem.luckScore = 6;
         }
         else
         {
             fishItem.rarity = InventorySystem.Rarity.Common;
             fishItem.sellPrice = 15;
+            fishItem.luckScore = 2;
         }
 
         fishItem.maxStackSize = 20; // 20 fish max per slot!

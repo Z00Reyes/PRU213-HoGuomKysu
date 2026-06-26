@@ -16,6 +16,7 @@ namespace InventorySystem
         public int price;
         public Sprite icon;
         public bool isBobber; // true if bobber, false if rod
+        public int luckLevel; // Lucky ratio
     }
 
     public class BuyFishingRodSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
