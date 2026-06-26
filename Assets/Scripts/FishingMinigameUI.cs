@@ -26,6 +26,7 @@ public class FishingMinigameUI : MonoBehaviour
     // Trophy references
     private Image trophyFishImage;
     private Text trophyFishNameText;
+    private Text trophyFishStatsText;
 
     // Alert references
     private Text biteAlertText;
@@ -400,8 +401,8 @@ public class FishingMinigameUI : MonoBehaviour
         GameObject fishNameGo = new GameObject("TrophyFishName");
         fishNameGo.transform.SetParent(dialogGo.transform, false);
         RectTransform fishNameRt = fishNameGo.AddComponent<RectTransform>();
-        fishNameRt.anchorMin = new Vector2(0f, 0.2f);
-        fishNameRt.anchorMax = new Vector2(1f, 0.35f);
+        fishNameRt.anchorMin = new Vector2(0f, 0.28f);
+        fishNameRt.anchorMax = new Vector2(1f, 0.38f);
         fishNameRt.sizeDelta = Vector2.zero;
         fishNameRt.anchoredPosition = Vector2.zero;
 
@@ -412,12 +413,29 @@ public class FishingMinigameUI : MonoBehaviour
         trophyFishNameText.fontSize = 20;
         trophyFishNameText.alignment = TextAnchor.MiddleCenter;
 
+        // Fish Stats
+        GameObject fishStatsGo = new GameObject("TrophyFishStats");
+        fishStatsGo.transform.SetParent(dialogGo.transform, false);
+        RectTransform fishStatsRt = fishStatsGo.AddComponent<RectTransform>();
+        fishStatsRt.anchorMin = new Vector2(0f, 0.16f);
+        fishStatsRt.anchorMax = new Vector2(1f, 0.26f);
+        fishStatsRt.sizeDelta = Vector2.zero;
+        fishStatsRt.anchoredPosition = Vector2.zero;
+
+        trophyFishStatsText = fishStatsGo.AddComponent<Text>();
+        trophyFishStatsText.font = uiFont;
+        trophyFishStatsText.supportRichText = true;
+        trophyFishStatsText.text = "Value: 15g | Luck: 2 ♣";
+        trophyFishStatsText.color = new Color(0.9f, 0.9f, 0.9f);
+        trophyFishStatsText.fontSize = 15;
+        trophyFishStatsText.alignment = TextAnchor.MiddleCenter;
+
         // Subtitle instructions
         GameObject subtitleGo = new GameObject("TrophySubtitle");
         subtitleGo.transform.SetParent(dialogGo.transform, false);
         RectTransform subtitleRt = subtitleGo.AddComponent<RectTransform>();
-        subtitleRt.anchorMin = new Vector2(0f, 0.05f);
-        subtitleRt.anchorMax = new Vector2(1f, 0.18f);
+        subtitleRt.anchorMin = new Vector2(0f, 0.03f);
+        subtitleRt.anchorMax = new Vector2(1f, 0.12f);
         subtitleRt.sizeDelta = Vector2.zero;
         subtitleRt.anchoredPosition = Vector2.zero;
 
@@ -480,10 +498,25 @@ public class FishingMinigameUI : MonoBehaviour
         timerText.text = string.Format("Time: {0:F1}s\nHold Left-Click", timeLeft);
     }
 
-    public void ShowTrophy(Sprite fishSprite, string fishName)
+    public void ShowTrophy(InventorySystem.ItemData fishItem)
     {
-        trophyFishImage.sprite = fishSprite;
-        trophyFishNameText.text = fishName;
+        trophyFishImage.sprite = fishItem.icon;
+        trophyFishNameText.text = fishItem.itemName;
+
+        Color rarityColor = Color.white;
+        switch (fishItem.rarity)
+        {
+            case InventorySystem.Rarity.Common: rarityColor = new Color(0.95f, 0.95f, 0.95f); break;
+            case InventorySystem.Rarity.Rare: rarityColor = new Color(0.2f, 0.6f, 1.0f); break;
+            case InventorySystem.Rarity.Epic: rarityColor = new Color(0.7f, 0.3f, 0.9f); break;
+            case InventorySystem.Rarity.Legendary: rarityColor = new Color(1.0f, 0.6f, 0.0f); break;
+        }
+        trophyFishNameText.color = rarityColor;
+        
+        if (trophyFishStatsText != null) {
+            trophyFishStatsText.text = $"Value: <color=#FFD700>{fishItem.sellPrice}</color>g | Luck: <color=#32CD32>{fishItem.luckScore}</color> ♣";
+        }
+
         trophyPanelGo.SetActive(true);
     }
 

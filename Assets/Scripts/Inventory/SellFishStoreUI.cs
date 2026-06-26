@@ -825,20 +825,16 @@ namespace InventorySystem
             Sprite[] fishSprites = Resources.LoadAll<Sprite>("Sprites/Fishes");
             foreach (Sprite sprite in fishSprites)
             {
-                string[] files = System.IO.Directory.GetFiles(folderPath, "fish_fishing-*.png");
-                foreach (string filePath in files)
+                if (!sprite.name.StartsWith("fish_fishing-")) continue;
+
+                string rawName = sprite.name.Replace("fish_fishing-", "");
+                string baseFishName = FormatFishName(rawName);
+                
+                string[] sizePrefixes = { "Small ", "", "Large ", "Giant " };
+                foreach (string prefix in sizePrefixes)
                 {
-                    string filename = System.IO.Path.GetFileNameWithoutExtension(filePath);
-                    string rawName = filename.Replace("fish_fishing-", "");
-                    string fishName = FormatFishName(rawName);
-                    
-                    // Relative path for AssetDatabase
-                    string relativePath = "Assets/Model/Fishes/" + System.IO.Path.GetFileName(filePath);
-                    Sprite sprite = null;
-#if UNITY_EDITOR
-                    sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(relativePath);
-#endif
-                    
+                    string fishName = prefix + baseFishName;
+
                     // Create ItemData
                     ItemData fishItem = ScriptableObject.CreateInstance<ItemData>();
                     fishItem.id = "fish_" + fishName.Replace(" ", "_").ToLower();
@@ -847,29 +843,48 @@ namespace InventorySystem
                     fishItem.type = ItemType.Material;
                     
                     // Determine rarity & price
-                    if (fishName.Contains("Shark") || fishName.Contains("Ray") || fishName.Contains("Dinosaur"))
+                    if (baseFishName.Contains("Shark") || baseFishName.Contains("Ray") || baseFishName.Contains("Dinosaur"))
                     {
                         fishItem.rarity = Rarity.Legendary;
                         fishItem.sellPrice = 500;
+                        fishItem.luckScore = 15;
                     }
-                    else if (fishName.Contains("Salmon") || fishName.Contains("Trout") || fishName.Contains("Eel") || fishName.Contains("Pike"))
+                    else if (baseFishName.Contains("Salmon") || baseFishName.Contains("Trout") || baseFishName.Contains("Eel") || baseFishName.Contains("Pike"))
                     {
                         fishItem.rarity = Rarity.Epic;
                         fishItem.sellPrice = 150;
+                        fishItem.luckScore = 10;
                     }
-                    else if (fishName.Contains("Bass") || fishName.Contains("Gar") || fishName.Contains("Porgy") || fishName.Contains("Snapper") || fishName.Contains("Perch"))
+                    else if (baseFishName.Contains("Bass") || baseFishName.Contains("Gar") || baseFishName.Contains("Porgy") || baseFishName.Contains("Snapper") || baseFishName.Contains("Perch"))
                     {
                         fishItem.rarity = Rarity.Rare;
                         fishItem.sellPrice = 50;
+                        fishItem.luckScore = 6;
                     }
                     else
                     {
                         fishItem.rarity = Rarity.Common;
                         fishItem.sellPrice = 15;
+                        fishItem.luckScore = 2;
                     }
 
-                fishItem.icon = sprite;
-                catalogFishItems.Add(fishItem);
+                    // Apply size multipliers
+                    if (prefix == "Giant ") {
+                        fishItem.sellPrice *= 5;
+                        fishItem.description += "\n<color=#FFD700>Size: GIANT (x5 Value!)</color>";
+                    } else if (prefix == "Large ") {
+                        fishItem.sellPrice *= 2;
+                        fishItem.description += "\n<color=#00FF00>Size: Large (x2 Value)</color>";
+                    } else if (prefix == "Small ") {
+                        fishItem.sellPrice = Mathf.Max(1, fishItem.sellPrice / 2);
+                        fishItem.description += "\n<color=#A0A0A0>Size: Small (x0.5 Value)</color>";
+                    } else {
+                        fishItem.description += "\n<color=#FFFFFF>Size: Normal</color>";
+                    }
+
+                    fishItem.icon = sprite;
+                    catalogFishItems.Add(fishItem);
+                }
             }
 
             // Sort by sell price ascending (and alphabetically by name if prices are equal)
