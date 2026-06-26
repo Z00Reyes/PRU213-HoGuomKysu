@@ -75,12 +75,10 @@ namespace InventorySystem
             }
 
             // Load Slot Sprite
-#if UNITY_EDITOR
-            slotBgSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/ItemSlots/ItemSlots/Item_Slot-5.png");
-#endif
+            slotBgSprite = Resources.Load<Sprite>("Sprites/ItemSlots/Item_Slot-5");
             if (slotBgSprite == null)
             {
-                Debug.LogWarning("SellFishStoreUI: Could not load Item_Slot-5.png sprite, using default.");
+                Debug.LogWarning("SellFishStoreUI: Could not load Item_Slot-5.png sprite from Resources, using default.");
             }
 
             // Initialize fish catalog
@@ -315,7 +313,7 @@ namespace InventorySystem
             headerRt.anchoredPosition = Vector2.zero;
 
             // Title text
-            TextMeshProUGUI titleText = CreateText(headerGo.transform, "TitleText", "FISH STALL", 28, new Color(1f, 0.85f, 0f));
+            TextMeshProUGUI titleText = CreateText(headerGo.transform, "TitleText", "FISH STALL", 28, new Color(0.08f, 0.08f, 0.1f));
             RectTransform titleRt = titleText.GetComponent<RectTransform>();
             titleRt.anchorMin = new Vector2(0f, 0.5f);
             titleRt.anchorMax = new Vector2(0f, 0.5f);
@@ -324,7 +322,7 @@ namespace InventorySystem
             titleRt.sizeDelta = new Vector2(300, 50);
 
             // Gold display text
-            goldText = CreateText(headerGo.transform, "GoldText", "Total Gold: 0g", 20, new Color(1f, 0.85f, 0f), TextAlignmentOptions.Right);
+            goldText = CreateText(headerGo.transform, "GoldText", "Total Gold: 0g", 20, new Color(0.08f, 0.08f, 0.1f), TextAlignmentOptions.Right);
             RectTransform goldRt = goldText.GetComponent<RectTransform>();
             goldRt.anchorMin = new Vector2(1f, 0.5f);
             goldRt.anchorMax = new Vector2(1f, 0.5f);
@@ -471,7 +469,7 @@ namespace InventorySystem
             rarityRt.anchoredPosition = Vector2.zero;
 
             // Description
-            detailDescText = CreateText(detailsPanel.transform, "ItemDescText", "Choose any fish from your inventory to sell it for gold.", 14, new Color(0.8f, 0.8f, 0.8f), TextAlignmentOptions.Center);
+            detailDescText = CreateText(detailsPanel.transform, "ItemDescText", "Choose any fish from your inventory to sell it for gold.", 14, new Color(0.95f, 0.95f, 0.95f), TextAlignmentOptions.Center);
             RectTransform descRt = detailDescText.GetComponent<RectTransform>();
             descRt.anchorMin = new Vector2(0.08f, 0.32f);
             descRt.anchorMax = new Vector2(0.92f, 0.52f);
@@ -662,7 +660,7 @@ namespace InventorySystem
         {
             if (goldText != null)
             {
-                goldText.text = $"Gold: <color=#FFD700>{currentGold}</color>g";
+                goldText.text = $"Gold: <b>{currentGold}</b>g";
             }
         }
 
@@ -794,7 +792,7 @@ namespace InventorySystem
                 case Rarity.Rare: return new Color(0.2f, 0.6f, 1.0f);
                 case Rarity.Epic: return new Color(0.7f, 0.3f, 0.9f);
                 case Rarity.Legendary: return new Color(1.0f, 0.6f, 0.0f);
-                default: return new Color(0.8f, 0.8f, 0.8f);
+                default: return new Color(0.95f, 0.95f, 0.95f);
             }
         }
 
@@ -822,8 +820,10 @@ namespace InventorySystem
         private void InitializeCatalog()
         {
             catalogFishItems.Clear();
-            string folderPath = System.IO.Path.Combine(Application.dataPath, "Model/Fishes");
-            if (System.IO.Directory.Exists(folderPath))
+
+            // Load all fish sprites from Resources folder (works in both Editor and builds)
+            Sprite[] fishSprites = Resources.LoadAll<Sprite>("Sprites/Fishes");
+            foreach (Sprite sprite in fishSprites)
             {
                 string[] files = System.IO.Directory.GetFiles(folderPath, "fish_fishing-*.png");
                 foreach (string filePath in files)
@@ -851,37 +851,37 @@ namespace InventorySystem
                     {
                         fishItem.rarity = Rarity.Legendary;
                         fishItem.sellPrice = 500;
-                        fishItem.luckScore = 15;
                     }
                     else if (fishName.Contains("Salmon") || fishName.Contains("Trout") || fishName.Contains("Eel") || fishName.Contains("Pike"))
                     {
                         fishItem.rarity = Rarity.Epic;
                         fishItem.sellPrice = 150;
-                        fishItem.luckScore = 10;
                     }
                     else if (fishName.Contains("Bass") || fishName.Contains("Gar") || fishName.Contains("Porgy") || fishName.Contains("Snapper") || fishName.Contains("Perch"))
                     {
                         fishItem.rarity = Rarity.Rare;
                         fishItem.sellPrice = 50;
-                        fishItem.luckScore = 6;
                     }
                     else
                     {
                         fishItem.rarity = Rarity.Common;
                         fishItem.sellPrice = 15;
-                        fishItem.luckScore = 2;
                     }
 
-                    fishItem.icon = sprite;
-                    catalogFishItems.Add(fishItem);
-                }
+                fishItem.icon = sprite;
+                catalogFishItems.Add(fishItem);
+            }
 
-                // Sort by sell price ascending (and alphabetically by name if prices are equal)
-                catalogFishItems.Sort((a, b) => {
-                    int priceCompare = a.sellPrice.CompareTo(b.sellPrice);
-                    if (priceCompare != 0) return priceCompare;
-                    return string.Compare(a.itemName, b.itemName, System.StringComparison.OrdinalIgnoreCase);
-                });
+            // Sort by sell price ascending (and alphabetically by name if prices are equal)
+            catalogFishItems.Sort((a, b) => {
+                int priceCompare = a.sellPrice.CompareTo(b.sellPrice);
+                if (priceCompare != 0) return priceCompare;
+                return string.Compare(a.itemName, b.itemName, System.StringComparison.OrdinalIgnoreCase);
+            });
+
+            if (catalogFishItems.Count == 0)
+            {
+                Debug.LogWarning("SellFishStoreUI: No fish sprites found in Resources/Sprites/Fishes/. Make sure fish PNGs are in the Resources folder.");
             }
         }
 

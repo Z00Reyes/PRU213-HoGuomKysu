@@ -69,13 +69,10 @@ public class PlayerController25D : MonoBehaviour
         animator = GetComponent<Animator>();
         animator.speed = 1f;  // Force animation playback speed = 1x
 
-        // Tự động tải Sprite phao câu từ Assets nếu chưa gán
-#if UNITY_EDITOR
         if (bobberSprite == null)
         {
-            bobberSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Model/bobber-removebg-preview.png");
+            bobberSprite = Resources.Load<Sprite>("Sprites/bobber-removebg-preview");
         }
-#endif
 
         // Tìm kiếm các điểm neo đầu cần câu được kéo tay trong Editor dưới MC
         rodTipUp = transform.Find("RodTip_Up");
@@ -210,11 +207,7 @@ public class PlayerController25D : MonoBehaviour
                     }
                     else
                     {
-                        // Show warning and reset to Idle
-                        if (ui != null)
-                        {
-                            ui.ShowMessage("MUST CAST INTO WATER!");
-                        }
+                        // Reset to Idle (no UI warning shown)
                         fishingState = FishingState.CatchFailure;
                         biteReactionTimer = 2.0f; // Show warning message for 2 seconds
                     }
@@ -246,7 +239,6 @@ public class PlayerController25D : MonoBehaviour
                     // Fish bites! Start minigame immediately
                     if (ui != null)
                     {
-                        ui.ShowMessage("🎣 BITE!");
                         ui.ShowMinigame();
                     }
                     
@@ -660,50 +652,46 @@ public class PlayerController25D : MonoBehaviour
         fishName = "Unknown Fish";
         Sprite sprite = null;
 
+#if UNITY_EDITOR
+        // In editor: use filesystem to enumerate fish files
         string folderPath = Path.Combine(Application.dataPath, "Model/Fishes");
         if (Directory.Exists(folderPath))
         {
             string[] files = Directory.GetFiles(folderPath, "fish_fishing-*.png");
             if (files.Length > 0)
             {
-                int currentLuck = GetCurrentLuckLevel();
-                List<string> validFiles = new List<string>();
-
-                foreach (var file in files)
-                {
-                    string filename = Path.GetFileNameWithoutExtension(file);
-                    string rawName = filename.Replace("fish_fishing-", "");
-                    string formatted = FormatFishName(rawName);
-                    
-                    // Pre-calculate to check luck requirement
-                    // Note: Since icon isn't needed for luck check, we can pass null temporarily or do a lightweight check
-                    // Actually, GetOrCreateFishItemData handles caching, but let's just do a dry-run of the luck logic
-                    int fishLuck = GetFishLuck(formatted);
-                    if (fishLuck <= currentLuck)
-                    {
-                        validFiles.Add(file);
-                    }
-                }
-
-                if (validFiles.Count == 0)
-                {
-                    validFiles.Add(files[0]); // Fallback if no fish match (shouldn't happen with common fish)
-                }
-
-                string randomFilePath = validFiles[Random.Range(0, validFiles.Count)];
+                string randomFilePath = files[Random.Range(0, files.Length)];
                 
                 // Get relative path for AssetDatabase
                 string relativePath = "Assets" + randomFilePath.Substring(Application.dataPath.Length).Replace('\\', '/');
                 
-                string finalFilename = Path.GetFileNameWithoutExtension(randomFilePath);
-                string finalRawName = finalFilename.Replace("fish_fishing-", "");
-                fishName = FormatFishName(finalRawName);
+                // Format fish name from file name
+                string filename = Path.GetFileNameWithoutExtension(randomFilePath);
+                string rawName = filename.Replace("fish_fishing-", "");
+                
+                fishName = FormatFishName(rawName);
 
 #if UNITY_EDITOR
                 sprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(relativePath);
-#endif
             }
         }
+#else
+        // In builds: use Resources.LoadAll to enumerate fish sprites
+        Sprite[] fishSprites = Resources.LoadAll<Sprite>("Sprites/Fishes");
+        // Filter only fish_fishing-* sprites
+        var fishingSprites = new System.Collections.Generic.List<Sprite>();
+        foreach (var s in fishSprites)
+        {
+            if (s.name.StartsWith("fish_fishing-"))
+                fishingSprites.Add(s);
+        }
+        if (fishingSprites.Count > 0)
+        {
+            sprite = fishingSprites[Random.Range(0, fishingSprites.Count)];
+            string rawName = sprite.name.Replace("fish_fishing-", "");
+            fishName = FormatFishName(rawName);
+        }
+#endif
         return sprite;
     }
     
@@ -884,40 +872,35 @@ public class PlayerController25D : MonoBehaviour
 
     private Sprite GetRodSprite(string rodId)
     {
-#if UNITY_EDITOR
-        string path = "Assets/Model/Fishes/fishing_icons_32x32_6.png";
+        string resourceName = "fishing_icons_32x32_6";
         switch (rodId)
         {
-            case "fishing_rod_bamboo": path = "Assets/Model/Fishes/fishing_icons_32x32_6.png"; break;
-            case "fishing_rod_fiberglass": path = "Assets/Model/Fishes/fishing_icons_32x32_7.png"; break;
-            case "fishing_rod_carbon": path = "Assets/Model/Fishes/fishing_icons_32x32_8.png"; break;
-            case "fishing_rod_master": path = "Assets/Model/Fishes/fishing_icons_32x32_18.png"; break;
-            case "fishing_rod_golden": path = "Assets/Model/Fishes/fishing_icons_32x32_19.png"; break;
-            case "fishing_rod_lava": path = "Assets/Model/Fishes/fishing_icons_32x32_20.png"; break;
+            case "fishing_rod_bamboo": resourceName = "fishing_icons_32x32_6"; break;
+            case "fishing_rod_fiberglass": resourceName = "fishing_icons_32x32_7"; break;
+            case "fishing_rod_carbon": resourceName = "fishing_icons_32x32_8"; break;
+            case "fishing_rod_master": resourceName = "fishing_icons_32x32_18"; break;
+            case "fishing_rod_golden": resourceName = "fishing_icons_32x32_19"; break;
+            case "fishing_rod_lava": resourceName = "fishing_icons_32x32_20"; break;
         }
-        return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
-#else
-        return null;
-#endif
+        return Resources.Load<Sprite>("Sprites/Fishes/" + resourceName);
     }
 
     private Sprite GetBobberSprite(string bobberId)
     {
-#if UNITY_EDITOR
-        string path = "Assets/Model/bobber-removebg-preview.png";
+        string resourceName = "bobber-removebg-preview";
         switch (bobberId)
         {
-            case "fish_bobber_standard": path = "Assets/Model/bobber-removebg-preview.png"; break;
-            case "fish_bobber_bluecork": path = "Assets/Model/Fishes/fish_bobber-bluecork.png"; break;
-            case "fish_bobber_clover": path = "Assets/Model/Fishes/fish_bobber-clover.png"; break;
-            case "fish_bobber_donut": path = "Assets/Model/Fishes/fish_bobber-donut.png"; break;
-            case "fish_bobber_rainbow": path = "Assets/Model/Fishes/fish_bobber-rainbow.png"; break;
-            case "fish_bobber_crystal": path = "Assets/Model/Fishes/fish_bobber-crystal.png"; break;
+            case "fish_bobber_standard": resourceName = "bobber-removebg-preview"; break;
+            case "fish_bobber_bluecork": resourceName = "fish_bobber-bluecork"; break;
+            case "fish_bobber_clover": resourceName = "fish_bobber-clover"; break;
+            case "fish_bobber_donut": resourceName = "fish_bobber-donut"; break;
+            case "fish_bobber_rainbow": resourceName = "fish_bobber-rainbow"; break;
+            case "fish_bobber_crystal": resourceName = "fish_bobber-crystal"; break;
         }
-        return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(path);
-#else
-        return null;
-#endif
+        // bobber-removebg-preview is in root Sprites, others are in Sprites/Fishes
+        if (resourceName == "bobber-removebg-preview")
+            return Resources.Load<Sprite>("Sprites/" + resourceName);
+        return Resources.Load<Sprite>("Sprites/Fishes/" + resourceName);
     }
 
     void OnDestroy()
