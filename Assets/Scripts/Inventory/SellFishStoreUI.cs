@@ -727,7 +727,7 @@ namespace InventorySystem
             detailRarityText.text = $"{item.rarity.ToString().ToUpper()} FISH";
             detailRarityText.color = rarityColor;
 
-            detailDescText.text = item.description;
+            detailDescText.text = item.description + $"\n\n<color=#32CD32>Luck: {item.luckScore} ♣</color>";
             detailPriceText.text = $"Price: <color=#FFD700>{item.sellPrice}</color> Gold";
 
             int quantityOwned = GetOwnedQuantityOfFish(item.id);
@@ -851,21 +851,25 @@ namespace InventorySystem
                     {
                         fishItem.rarity = Rarity.Legendary;
                         fishItem.sellPrice = 500;
+                        fishItem.luckScore = 15;
                     }
                     else if (fishName.Contains("Salmon") || fishName.Contains("Trout") || fishName.Contains("Eel") || fishName.Contains("Pike"))
                     {
                         fishItem.rarity = Rarity.Epic;
                         fishItem.sellPrice = 150;
+                        fishItem.luckScore = 10;
                     }
                     else if (fishName.Contains("Bass") || fishName.Contains("Gar") || fishName.Contains("Porgy") || fishName.Contains("Snapper") || fishName.Contains("Perch"))
                     {
                         fishItem.rarity = Rarity.Rare;
                         fishItem.sellPrice = 50;
+                        fishItem.luckScore = 6;
                     }
                     else
                     {
                         fishItem.rarity = Rarity.Common;
                         fishItem.sellPrice = 15;
+                        fishItem.luckScore = 2;
                     }
 
                     fishItem.icon = sprite;

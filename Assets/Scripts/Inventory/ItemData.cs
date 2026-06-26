@@ -40,6 +40,9 @@ namespace InventorySystem
 
         [Header("Economy")]
         public int sellPrice = 10;
+        
+        [Header("Luck")]
+        public int luckScore;
 
         public virtual void Use()
         {

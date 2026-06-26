@@ -104,23 +104,23 @@ namespace InventorySystem
             shopItems.Clear();
 
             // 6 Rods
-            AddShopItem("fishing_rod_bamboo", "Bamboo Rod", "A basic bamboo rod. Lightweight and flexible.", 100, false);
-            AddShopItem("fishing_rod_fiberglass", "Fiberglass Rod", "A sturdy fiberglass rod. Durable and reliable.", 300, false);
-            AddShopItem("fishing_rod_carbon", "Carbon Rod", "A high-performance carbon rod. Extremely sensitive.", 600, false);
-            AddShopItem("fishing_rod_master", "Master Rod", "A legendary rod used by master anglers.", 1200, false);
-            AddShopItem("fishing_rod_golden", "Golden Rod", "Crafted from pure gold. Shines brilliantly.", 2500, false);
-            AddShopItem("fishing_rod_lava", "Lava Rod", "Forged in volcanic depths with hot magma energy.", 5000, false);
+            AddShopItem("fishing_rod_bamboo", "Bamboo Rod", "A basic bamboo rod. Lightweight and flexible.", 100, false, 3);
+            AddShopItem("fishing_rod_fiberglass", "Fiberglass Rod", "A sturdy fiberglass rod. Durable and reliable.", 300, false, 5);
+            AddShopItem("fishing_rod_carbon", "Carbon Rod", "A high-performance carbon rod. Extremely sensitive.", 600, false, 7);
+            AddShopItem("fishing_rod_master", "Master Rod", "A legendary rod used by master anglers.", 1200, false, 10);
+            AddShopItem("fishing_rod_golden", "Golden Rod", "Crafted from pure gold. Shines brilliantly.", 2500, false, 15);
+            AddShopItem("fishing_rod_lava", "Lava Rod", "Forged in volcanic depths with hot magma energy.", 5000, false, 20);
 
             // 6 Bobbers
-            AddShopItem("fish_bobber_standard", "Standard Bobber", "A standard red-and-white plastic bobber.", 50, true);
-            AddShopItem("fish_bobber_bluecork", "Blue Cork Bobber", "A blue-painted cork bobber. Floats very well.", 150, true);
-            AddShopItem("fish_bobber_clover", "Clover Bobber", "A lucky four-leaf clover bobber. Increases luck!", 300, true);
-            AddShopItem("fish_bobber_donut", "Donut Bobber", "A sweet pink glazed donut bobber. Watch out for fish!", 500, true);
-            AddShopItem("fish_bobber_rainbow", "Rainbow Bobber", "A colorful rainbow bobber. Makes beautiful reflections.", 1000, true);
-            AddShopItem("fish_bobber_crystal", "Crystal Bobber", "A glowing crystal bobber. Illuminates dark water.", 2000, true);
+            AddShopItem("fish_bobber_standard", "Standard Bobber", "A standard red-and-white plastic bobber.", 50, true, 0);
+            AddShopItem("fish_bobber_bluecork", "Blue Cork Bobber", "A blue-painted cork bobber. Floats very well.", 150, true, 1);
+            AddShopItem("fish_bobber_clover", "Clover Bobber", "A lucky four-leaf clover bobber. Increases luck!", 300, true, 2);
+            AddShopItem("fish_bobber_donut", "Donut Bobber", "A sweet pink glazed donut bobber. Watch out for fish!", 500, true, 3);
+            AddShopItem("fish_bobber_rainbow", "Rainbow Bobber", "A colorful rainbow bobber. Makes beautiful reflections.", 1000, true, 4);
+            AddShopItem("fish_bobber_crystal", "Crystal Bobber", "A glowing crystal bobber. Illuminates dark water.", 2000, true, 5);
         }
 
-        private void AddShopItem(string id, string name, string desc, int price, bool isBobber)
+        private void AddShopItem(string id, string name, string desc, int price, bool isBobber, int luckLevel = 0)
         {
             ShopItem item = new ShopItem
             {
@@ -129,7 +129,8 @@ namespace InventorySystem
                 description = desc,
                 price = price,
                 isBobber = isBobber,
-                icon = GetItemSprite(id, isBobber)
+                icon = GetItemSprite(id, isBobber),
+                luckLevel = luckLevel
             };
             shopItems.Add(item);
         }
@@ -697,7 +698,12 @@ namespace InventorySystem
             detailIcon.gameObject.SetActive(item.icon != null);
 
             detailNameText.text = item.itemName;
-            detailDescText.text = item.description;
+            
+            string extraInfo = "";
+            if (!item.isBobber) extraInfo = $"\n\n<color=#32CD32>Max Luck: {item.luckLevel} ♣</color>";
+            else extraInfo = $"\n\n<color=#32CD32>Bonus Luck: +{item.luckLevel} ♣</color>";
+            
+            detailDescText.text = item.description + extraInfo;
 
             bool isOwned = playerInventory.IsItemPurchased(item.id);
             bool isEquipped = item.isBobber ? (playerInventory.equippedBobberId == item.id) : (playerInventory.equippedRodId == item.id);
