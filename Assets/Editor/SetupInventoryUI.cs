@@ -148,6 +148,15 @@ namespace InventorySystem
             TMP_Text searchPlaceholder = searchField.placeholder as TMP_Text;
             if (searchPlaceholder != null) searchPlaceholder.text = "Search items...";
 
+            // Gold display text
+            TextMeshProUGUI goldText = CreateTMPText(headerGo.transform, "GoldText", "Gold: 0g", 20, new Color(1f, 0.85f, 0f), TextAlignmentOptions.Right);
+            RectTransform goldRt = goldText.GetComponent<RectTransform>();
+            goldRt.anchorMin = new Vector2(1f, 0.5f);
+            goldRt.anchorMax = new Vector2(1f, 0.5f);
+            goldRt.pivot = new Vector2(1f, 0.5f);
+            goldRt.anchoredPosition = new Vector2(-90, 0);
+            goldRt.sizeDelta = new Vector2(200, 50);
+
             // Close Button
             GameObject closeBtnGo = new GameObject("CloseButton");
             closeBtnGo.transform.SetParent(headerGo.transform, false);
@@ -245,6 +254,7 @@ namespace InventorySystem
 
             // 9. Wire InventoryUI fields
             inventoryUI.GetType().GetField("gridParent", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(inventoryUI, gridParentRt);
+            inventoryUI.GetType().GetField("goldText", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(inventoryUI, goldText);
             inventoryUI.GetType().GetField("tooltipUI", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(inventoryUI, null);
             inventoryUI.GetType().GetField("mainPanelGroup", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(inventoryUI, canvasGroup);
             inventoryUI.GetType().GetField("searchField", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).SetValue(inventoryUI, searchField);

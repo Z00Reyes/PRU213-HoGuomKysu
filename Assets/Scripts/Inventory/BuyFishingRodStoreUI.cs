@@ -342,7 +342,7 @@ namespace InventorySystem
             headerRt.anchoredPosition = Vector2.zero;
 
             // Title
-            TextMeshProUGUI titleText = CreateText(headerGo.transform, "TitleText", "FISHING MATE", 28, new Color(1f, 0.85f, 0f));
+            TextMeshProUGUI titleText = CreateText(headerGo.transform, "TitleText", "FISHING MATE", 28, new Color(0.08f, 0.08f, 0.1f));
             RectTransform titleRt = titleText.GetComponent<RectTransform>();
             titleRt.anchorMin = new Vector2(0f, 0.5f);
             titleRt.anchorMax = new Vector2(0f, 0.5f);
@@ -351,7 +351,7 @@ namespace InventorySystem
             titleRt.sizeDelta = new Vector2(300, 50);
 
             // Gold count
-            goldText = CreateText(headerGo.transform, "GoldText", "Gold: 0g", 20, new Color(1f, 0.85f, 0f), TextAlignmentOptions.Right);
+            goldText = CreateText(headerGo.transform, "GoldText", "Gold: 0g", 20, new Color(0.08f, 0.08f, 0.1f), TextAlignmentOptions.Right);
             RectTransform goldRt = goldText.GetComponent<RectTransform>();
             goldRt.anchorMin = new Vector2(1f, 0.5f);
             goldRt.anchorMax = new Vector2(1f, 0.5f);
@@ -465,7 +465,7 @@ namespace InventorySystem
             nameRt.anchoredPosition = Vector2.zero;
 
             // Description
-            detailDescText = CreateText(detailsPanel.transform, "ItemDescText", "Upgrade your gear to catch bigger and rarer fish!", 14, new Color(0.8f, 0.8f, 0.8f), TextAlignmentOptions.Center);
+            detailDescText = CreateText(detailsPanel.transform, "ItemDescText", "Upgrade your gear to catch bigger and rarer fish!", 14, new Color(0.95f, 0.95f, 0.95f), TextAlignmentOptions.Center);
             RectTransform descRt = detailDescText.GetComponent<RectTransform>();
             descRt.anchorMin = new Vector2(0.08f, 0.32f);
             descRt.anchorMax = new Vector2(0.92f, 0.55f);
@@ -645,7 +645,7 @@ namespace InventorySystem
         {
             if (goldText != null)
             {
-                goldText.text = $"Gold: <color=#FFD700>{currentGold}</color>g";
+                goldText.text = $"Gold: <b>{currentGold}</b>g";
             }
         }
 

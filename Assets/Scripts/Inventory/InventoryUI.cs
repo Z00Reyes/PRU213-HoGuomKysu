@@ -13,6 +13,7 @@ namespace InventorySystem
         [SerializeField] private Transform gridParent;
         [SerializeField] private ItemTooltipUI tooltipUI;
         [SerializeField] private CanvasGroup mainPanelGroup;
+        [SerializeField] private TextMeshProUGUI goldText;
 
         [Header("Prefab References (Fallback)")]
         [SerializeField] private GameObject slotPrefab;
@@ -51,6 +52,8 @@ namespace InventorySystem
             if (inventory != null)
             {
                 inventory.onInventoryChanged += RefreshUI;
+                inventory.onGoldChanged += UpdateGoldDisplay;
+                UpdateGoldDisplay(inventory.Gold);
             }
 
             // Bind filters
@@ -79,6 +82,15 @@ namespace InventorySystem
             if (inventory != null)
             {
                 inventory.onInventoryChanged -= RefreshUI;
+                inventory.onGoldChanged -= UpdateGoldDisplay;
+            }
+        }
+
+        private void UpdateGoldDisplay(int currentGold)
+        {
+            if (goldText != null)
+            {
+                goldText.text = $"Gold: <color=#FFD700>{currentGold}</color>g";
             }
         }
 
