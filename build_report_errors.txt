@@ -1,0 +1,42 @@
+Build Result: Unknown
+Total Errors: 0
+Total Warnings: 0
+Total Time: 0s
+
+--- BUILD STEPS ---
+Step: Build player (Duration: 0s)
+Step: Preprocess Player (Duration: 4.582703s)
+  [Log] 1 URP assets included in build
+- PC_RPAsset - Assets/Settings/PC_RPAsset.asset
+	 - PC_Renderer - Assets/Settings/PC_Renderer.asset - UnityEngine.Rendering.Universal.UniversalRendererData
+
+  [Log] [LinkExtractor] Merged 1 link.xml files (27 unique elements) to C:/LEARNING/PRU/Assets\packages-merged-link\link.xml
+Step: Prepare For Build (Duration: 0.001008s)
+Step: ProducePlayerScriptAssemblies (Duration: 2.9948125s)
+Step: Prebuild Cleanup and Recompile (Duration: 2.5714848s)
+Step: Compile scripts (Duration: 2.1824692s)
+Step: Generate and validate platform script types (Duration: 0.0477669s)
+Step: Verify Build setup (Duration: 0.0549286s)
+Step: GetUnityAssemblies (Duration: 0.0055268s)
+Step: GetPlayerAssemblies (Duration: 0.0157056s)
+Step: Check old data build (Duration: 0.0136931s)
+Step: Prepare assets for target platform (Duration: 0.0090919s)
+Step: Prepare splash screen (Duration: 0.0133337s)
+  [Log] Including Unity Splash Screen logo because 'Show Unity Logo' is enabled.
+Step: Build scripts DLLs (Duration: 0.045033s)
+Step: GetSystemAssemblies (Duration: 0.0010283s)
+Step: Building scenes (Duration: 1.5417623s)
+Step: Building scene Assets/Scenes/MainMenu.unity (Duration: 0.7009184s)
+Step: Building scene Assets/Scenes/MCScence.unity (Duration: 0.84081s)
+Step: Build GlobalGameManagers file (Duration: 0.1426395s)
+Step: Writing asset files (Duration: 0.9560438s)
+Step: Packaging assets - globalgamemanagers.assets (Duration: 0.3270026s)
+Step: Packaging assets - resources.assets (Duration: 0.2692513s)
+Step: Packaging assets - sharedassets0.assets = additional assets for scene 0: Assets/Scenes/MainMenu.unity (Duration: 0.0844344s)
+Step: Packaging assets - sharedassets1.assets = additional assets for scene 1: Assets/Scenes/MCScence.unity (Duration: 0.2395782s)
+Step: Building Resources/unity_builtin_extra (Duration: 0.1411836s)
+Step: Write data build dirty tracking information (Duration: 0.416805s)
+Step: Postprocess built player (Duration: 0s)
+Step: Setup incremental player build (Duration: 0.0622496s)
+Step: Incremental player build (Duration: 0.7390495s)
+Step: Report output files (Duration: 0.0532748s)
