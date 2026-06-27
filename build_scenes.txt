@@ -1,0 +1,4 @@
+Total scenes in build settings: 3
+Scene 0: path='Assets/Scenes/MainMenu.unity', enabled=True
+Scene 1: path='Assets/Scenes/MapScene.unity', enabled=False
+Scene 2: path='Assets/Scenes/MCScence.unity', enabled=True

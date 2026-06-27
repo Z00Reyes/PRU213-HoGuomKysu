@@ -1,0 +1,6 @@
+--- ERROR #0 (2026-06-27T09:50:50.5399337+07:00) ---
+[Package Manager Window] Error while getting access token: invalid configuration from Unity Connect
+Stack Trace:
+UnityEditor.AsyncHTTPClient:Done (UnityEditor.AsyncHTTPClient/State,int)
+
+
