@@ -3269,6 +3269,78 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 188727347}
   m_CullTransparentMesh: 1
+--- !u!1001 &190905296
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -8679921383154817045, guid: 947bac184c47c984491cd7ee30e1fd72, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 947bac184c47c984491cd7ee30e1fd72, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 947bac184c47c984491cd7ee30e1fd72, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 947bac184c47c984491cd7ee30e1fd72, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -13.77
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 947bac184c47c984491cd7ee30e1fd72, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 2.14
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 947bac184c47c984491cd7ee30e1fd72, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 7.9581347
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 947bac184c47c984491cd7ee30e1fd72, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 947bac184c47c984491cd7ee30e1fd72, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 947bac184c47c984491cd7ee30e1fd72, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 947bac184c47c984491cd7ee30e1fd72, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 947bac184c47c984491cd7ee30e1fd72, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 947bac184c47c984491cd7ee30e1fd72, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 180
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 947bac184c47c984491cd7ee30e1fd72, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 947bac184c47c984491cd7ee30e1fd72, type: 3}
+      propertyPath: m_Name
+      value: tripo_convert_0262afa5-ad99-4da5-af23-b85a7b2158b3
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 947bac184c47c984491cd7ee30e1fd72, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 274923417}
+  m_SourcePrefab: {fileID: 100100000, guid: 947bac184c47c984491cd7ee30e1fd72, type: 3}
 --- !u!1 &194244076
 GameObject:
   m_ObjectHideFlags: 0
@@ -4615,6 +4687,25 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 1899fe3c952e3384798009e2ee19e4e1, type: 3}
   m_PrefabInstance: {fileID: 262926781}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &274923416 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 947bac184c47c984491cd7ee30e1fd72, type: 3}
+  m_PrefabInstance: {fileID: 190905296}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &274923417
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 274923416}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 780f25f09170b3d4daf69bcde1552f0b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventorySystem.BuyFishingRodStoreUI
+  interactionRadius: 4
+  promptOffset: {x: 0, y: 3.2, z: 0}
 --- !u!1 &285924950
 GameObject:
   m_ObjectHideFlags: 0
@@ -30116,8 +30207,8 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 49.50495
-  MaxDistance: 70
+  MinDistance: 78.32075
+  MaxDistance: 78.32075
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -30201,7 +30292,7 @@ Transform:
   m_GameObject: {fileID: 1924271614}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 13.5, y: -0.13499999, z: 62.3}
+  m_LocalPosition: {x: 12.88, y: -0.13499999, z: 62.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -33797,3 +33888,4 @@ SceneRoots:
   - {fileID: 669842819}
   - {fileID: 32107772}
   - {fileID: 106459470}
+  - {fileID: 190905296}
