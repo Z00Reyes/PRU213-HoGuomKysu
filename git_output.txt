@@ -1,0 +1,22 @@
+--- git log main -n 5 --oneline ---
+STDOUT:
+6c64bee feat: implement build error diagnostic tools and add scene management logic
+3baa74f feat: add recovery scene and model import metadata
+e435171 Merge pull request #3 from Z00Reyes/thanh
+15acd52  FIX UI GAME
+61ead39 Merge pull request #2 from Z00Reyes/thanh
+
+STDERR:
+
+
+--- git log thien -n 5 --oneline ---
+STDOUT:
+6c64bee feat: implement build error diagnostic tools and add scene management logic
+3baa74f feat: add recovery scene and model import metadata
+e435171 Merge pull request #3 from Z00Reyes/thanh
+15acd52  FIX UI GAME
+61ead39 Merge pull request #2 from Z00Reyes/thanh
+
+STDERR:
+
+

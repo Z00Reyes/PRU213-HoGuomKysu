@@ -47,6 +47,12 @@ public class FishingMinigameUI : MonoBehaviour
         CreateUIElements();
     }
 
+    void OnDestroy()
+    {
+        if (Instance == this)
+            Instance = null;
+    }
+
     private Font GetDefaultFont()
     {
         Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
