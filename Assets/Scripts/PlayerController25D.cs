@@ -27,6 +27,12 @@ public class PlayerController25D : MonoBehaviour
     }
     [Header("Fishing State Machine")]
     public FishingState fishingState = FishingState.Idle;
+
+    [Header("Audio Sounds")]
+    public AudioClip castSound;
+    public AudioClip reelSound;
+    private AudioSource mainAudioSource;
+    private AudioSource reelAudioSource;
     
     private float castTimer = 0f;       // Bộ đếm thời gian quăng cần
     public float castDuration = 0.85f;  // Thời gian quăng cần (khớp với Animation Clip)
@@ -118,6 +124,16 @@ public class PlayerController25D : MonoBehaviour
             uiGo.AddComponent<FishingMinigameUI>();
         }
         ui = FishingMinigameUI.Instance;
+
+        mainAudioSource = GetComponent<AudioSource>();
+        if (mainAudioSource == null)
+        {
+            mainAudioSource = gameObject.AddComponent<AudioSource>();
+        }
+
+        reelAudioSource = gameObject.AddComponent<AudioSource>();
+        reelAudioSource.playOnAwake = false;
+        reelAudioSource.loop = true;
     }
 
     void Update()
@@ -195,6 +211,10 @@ public class PlayerController25D : MonoBehaviour
                     {
                         animator.SetTrigger("Cast");
                     }
+                    if (mainAudioSource != null && castSound != null)
+                    {
+                        mainAudioSource.PlayOneShot(castSound);
+                    }
                 }
                 break;
 
@@ -255,6 +275,11 @@ public class PlayerController25D : MonoBehaviour
                     
                     fishingState = FishingState.Minigame;
                     minigameProgress = 0.2f; // Give a small headstart
+                    if (reelAudioSource != null && reelSound != null)
+                    {
+                        reelAudioSource.clip = reelSound;
+                        reelAudioSource.Play();
+                    }
                     minigameTimer = minigameDuration;
                     minigameFishPos = 0.5f;
                     minigameFishTarget = 0.5f;
@@ -274,6 +299,11 @@ public class PlayerController25D : MonoBehaviour
             case FishingState.BiteActive:
                 // Deprecated: directly transitions from WaitingForBite to Minigame now
                 fishingState = FishingState.Minigame;
+                if (reelAudioSource != null && reelSound != null && !reelAudioSource.isPlaying)
+                {
+                    reelAudioSource.clip = reelSound;
+                    reelAudioSource.Play();
+                }
                 break;
 
             case FishingState.Minigame:
@@ -532,6 +562,10 @@ public class PlayerController25D : MonoBehaviour
         if (lineRenderer != null)
         {
             lineRenderer.enabled = false;
+        }
+        if (reelAudioSource != null && reelAudioSource.isPlaying)
+        {
+            reelAudioSource.Stop();
         }
     }
 

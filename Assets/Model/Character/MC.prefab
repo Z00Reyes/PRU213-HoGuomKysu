@@ -169,11 +169,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController25D
   speed: 5
   gravity: -9.81
+  fishingState: 0
+  castSound: {fileID: 8300000, guid: 98ba4f3183efc8e4ca87fec8e2fb4ad7, type: 3}
+  reelSound: {fileID: 8300000, guid: 52cc132d077f0994887f4429e29d09fe, type: 3}
   castDuration: 0.85
   bobberSprite: {fileID: 0}
   castDistance: 5
   castArcHeight: 1.2
   bobberYOffset: -0.3
+  minigameBarSize: 0.22
+  minigameDuration: 15
   rodTipUp: {fileID: 8576449575271371026}
   rodTipDown: {fileID: 1441843029544485580}
   rodTipLeft: {fileID: 6938915648931526430}
