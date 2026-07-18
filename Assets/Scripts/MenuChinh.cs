@@ -10,6 +10,11 @@ public class MenuChinh : MonoBehaviour
     [SerializeField] private GameObject mainMenuPanel; // Canvas hoặc Panel chứa toàn bộ UI nút bấm/hình nền cần ẩn đi khi chạy video
     [SerializeField] private AudioSource backgroundMusic; // Kéo AudioSource nhạc nền vào đây (hoặc để trống tự tìm)
 
+    [Header("Loading Screen Settings")]
+    [SerializeField] private GameObject loadingPanel; // Panel chứa màn hình Loading
+    [SerializeField] private UnityEngine.UI.Slider loadingSlider; // Thanh slider tiến trình
+    [SerializeField] private TMPro.TextMeshProUGUI loadingText; // Text hiển thị phần trăm
+
     private bool isPlayingVideo = false;
 
     private void Start()
@@ -122,7 +127,69 @@ public class MenuChinh : MonoBehaviour
     private void StartGame()
     {
         isPlayingVideo = false;
-        SceneManager.LoadScene("MCScence");
+        if (loadingPanel != null)
+        {
+            StartCoroutine(LoadSceneAsyncCoroutine());
+        }
+        else
+        {
+            SceneManager.LoadScene("MCScence");
+        }
+    }
+
+    private System.Collections.IEnumerator LoadSceneAsyncCoroutine()
+    {
+        // Kích hoạt lại Canvas chính (vì đã bị ẩn đi khi chạy video)
+        if (mainMenuPanel != null)
+        {
+            mainMenuPanel.SetActive(true);
+        }
+
+        if (loadingPanel != null)
+        {
+            loadingPanel.SetActive(true);
+        }
+
+        // Tắt panel video nếu có
+        if (videoPanel != null)
+        {
+            videoPanel.SetActive(false);
+        }
+        
+        // Tắt video player GameObject để đảm bảo không bị đè hình/âm thanh
+        if (videoPlayer != null)
+        {
+            videoPlayer.gameObject.SetActive(false);
+        }
+
+        AsyncOperation operation = SceneManager.LoadSceneAsync("MCScence");
+        operation.allowSceneActivation = false;
+
+        float progress = 0f;
+        while (!operation.isDone)
+        {
+            float targetProgress = Mathf.Clamp01(operation.progress / 0.9f);
+            
+            // Tăng thanh cuộn mượt mà
+            progress = Mathf.MoveTowards(progress, targetProgress, Time.deltaTime * 0.8f);
+            
+            if (loadingSlider != null)
+            {
+                loadingSlider.value = progress;
+            }
+
+            if (loadingText != null)
+            {
+                loadingText.text = $"ĐANG TẢI... {Mathf.RoundToInt(progress * 100)}%";
+            }
+
+            if (progress >= 0.99f)
+            {
+                operation.allowSceneActivation = true;
+            }
+
+            yield return null;
+        }
     }
 
     // Hàm xử lý khi bấm nút SETTING
